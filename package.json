@@ -1,6 +1,6 @@
 {
   "name": "ai-vault-memory-obsidian",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Obsidian AI Chat and semantic memory plugin using OpenAI-compatible APIs",
   "main": "main.js",
   "scripts": {
