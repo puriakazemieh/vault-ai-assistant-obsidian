@@ -63,14 +63,53 @@
   line-height: 1.5;
   font-size: 14px;
   color: var(--text-normal);
+  padding: 12px 16px;
+  border-radius: 12px;
+  width: fit-content;
+  max-width: 85%;
+  user-select: text;
+  position: relative;
 }
-.nara-memory-message p { margin: 8px 0; }
+.nara-memory-message p { margin: 0 0 8px 0; }
+.nara-memory-message p:last-child { margin: 0; }
 .nara-memory-message strong { color: var(--text-normal); display: block; margin-bottom: 4px; font-size: 13px; opacity: 0.8; }
 .nara-memory-message--user {
-  /* user message is usually just plain text */
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  align-self: flex-start;
+  border-bottom-right-radius: 4px;
+}
+.nara-memory-message--user p {
+  color: var(--text-on-accent);
 }
 .nara-memory-message--assistant {
-  /* assistant message is also plain */
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  align-self: flex-end;
+  border-bottom-left-radius: 4px;
+}
+.nara-message-copy {
+  position: absolute;
+  bottom: -24px;
+  left: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.nara-memory-message--assistant:hover .nara-message-copy {
+  opacity: 1;
+}
+.nara-message-copy:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
 }
 
 /* System/Execution Block */
