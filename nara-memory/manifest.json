@@ -1,0 +1,9 @@
+{
+  "id": "nara-memory",
+  "name": "Nara Memory",
+  "version": "0.2.0",
+  "minAppVersion": "1.5.0",
+  "description": "Private vault memory, semantic search, and AI note analysis through an OpenAI-compatible NaraRouter API.",
+  "author": "Your Name",
+  "isDesktopOnly": false
+}
