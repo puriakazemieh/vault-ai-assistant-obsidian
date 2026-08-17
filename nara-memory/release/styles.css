@@ -72,11 +72,17 @@
   cursor: text;
   position: relative;
 }
-.nara-memory-message * {
+.nara-memory-message,
+.nara-memory-message *,
+.nara-memory-message--user,
+.nara-memory-message--user *,
+.nara-memory-message .markdown-rendered,
+.nara-memory-message .markdown-rendered * {
   user-select: text !important;
   -webkit-user-select: text !important;
+  cursor: text;
 }
-.nara-memory-message p { margin: 0 0 8px 0; }
+.nara-memory-message p { margin: 0 0 8px 0; user-select: text !important; -webkit-user-select: text !important; }
 .nara-memory-message p:last-child { margin: 0; }
 .nara-memory-message strong { color: var(--text-normal); display: block; margin-bottom: 4px; font-size: 13px; opacity: 0.8; }
 .nara-memory-message--user {

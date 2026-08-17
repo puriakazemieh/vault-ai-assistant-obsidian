@@ -99,7 +99,9 @@ export class NaraMemoryView extends ItemView {
     if (!messages.length) history.createEl("p", { text: t("chat.emptyPlaceholder", lang), cls: "nara-memory-message" });
     messages.forEach((message, index) => {
       const bubble = history.createDiv({ cls: `nara-memory-message nara-memory-message--${message.role}` });
-      const body = bubble.createDiv();
+      const body = bubble.createDiv({ cls: "markdown-rendered" });
+      body.style.userSelect = "text";
+      body.style.webkitUserSelect = "text";
       void MarkdownRenderer.render(this.plugin.app, message.content, body, "", this.plugin);
       
       const actions = bubble.createDiv({ cls: "nara-message-actions" });
@@ -151,8 +153,8 @@ export class NaraMemoryView extends ItemView {
       else input.style.overflowY = 'hidden';
     });
 
-    const controls = root.createDiv({ cls: "nara-input-controls" });
-    const leftTools = controls.createDiv();
+    const toolbar = inputContainer.createDiv({ cls: "nara-input-toolbar" });
+    const leftTools = toolbar.createDiv();
     leftTools.style.display = "flex";
     leftTools.style.gap = "8px";
     const attachBtn = leftTools.createEl("button", { cls: "nara-attach-button", title: t("attachments.attachTooltip", lang) });
@@ -185,7 +187,7 @@ export class NaraMemoryView extends ItemView {
         .catch(() => { menu.hide(); new Notice(t("model.error", lang)); });
     });
 
-    const rightTools = controls.createDiv();
+    const rightTools = toolbar.createDiv();
     rightTools.style.display = "flex"; rightTools.style.gap = "8px"; rightTools.style.alignItems = "center";
 
     const send = rightTools.createEl("button", { cls: "nara-send-button" });
