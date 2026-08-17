@@ -71,7 +71,7 @@
 }
 
 /* Messages */
-.vault-ai-memory-message {
+.vault-ai-memory-view .vault-ai-memory-message {
   white-space: pre-wrap;
   line-height: 1.5;
   font-size: 14px;
@@ -80,20 +80,20 @@
   border-radius: 12px;
   width: fit-content;
   max-width: 85%;
-  user-select: text !important;
+  user-select: text;
   cursor: text;
   position: relative;
 }
-.vault-ai-memory-message,
-.vault-ai-memory-message *,
-.vault-ai-memory-message--user,
-.vault-ai-memory-message--user *,
-.vault-ai-memory-message .markdown-rendered,
-.vault-ai-memory-message .markdown-rendered * {
-  user-select: text !important;
+.vault-ai-memory-view .vault-ai-memory-message,
+.vault-ai-memory-view .vault-ai-memory-message *,
+.vault-ai-memory-view .vault-ai-memory-message--user,
+.vault-ai-memory-view .vault-ai-memory-message--user *,
+.vault-ai-memory-view .vault-ai-memory-message .markdown-rendered,
+.vault-ai-memory-view .vault-ai-memory-message .markdown-rendered * {
+  user-select: text;
   cursor: text;
 }
-.vault-ai-memory-message p { margin: 0 0 8px 0; user-select: text !important; }
+.vault-ai-memory-view .vault-ai-memory-message p { margin: 0 0 8px 0; user-select: text; }
 .vault-ai-memory-message p:last-child { margin: 0; }
 .vault-ai-memory-message strong { color: var(--text-normal); display: block; margin-bottom: 4px; font-size: 13px; opacity: 0.8; }
 .vault-ai-memory-message--user {
@@ -200,9 +200,9 @@
   background-color: var(--background-primary);
   margin-top: auto;
 }
-.vault-ai-input-container textarea {
+.vault-ai-memory-view .vault-ai-input-container textarea {
   border: none;
-  box-shadow: none !important;
+  box-shadow: none;
   background: transparent;
   resize: none;
   font-family: inherit;
@@ -325,8 +325,8 @@
 }
 
 /* Utilities */
-.vault-ai-hidden {
-  display: none !important;
+.vault-ai-memory-view .vault-ai-hidden {
+  display: none;
 }
 
 /* Specific stuff left from before for search/manage if they still exist */

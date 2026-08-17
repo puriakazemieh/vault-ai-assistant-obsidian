@@ -47,7 +47,7 @@ export class VaultAiClient {
 
   async listModels(): Promise<VaultAiModel[]> {
     const data = await this.get("/models");
-    if (!isRecord(data) || !Array.isArray(data.data)) return [];
+    if (!isRecord(data) || !isUnknownArray(data.data)) return [];
     return data.data.flatMap((model): VaultAiModel[] => {
       if (!isRecord(model) || typeof model.id !== "string") return [];
       return [{ id: model.id, name: typeof model.name === "string" ? model.name : undefined }];
@@ -73,12 +73,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
+}
+
 function responseErrorDetail(json: unknown, fallback: string): string {
   return isRecord(json) && "error" in json ? JSON.stringify(json) : fallback;
 }
 
 function chatContent(value: unknown): string | null {
-  if (!isRecord(value) || !Array.isArray(value.choices)) return null;
+  if (!isRecord(value) || !isUnknownArray(value.choices)) return null;
   const firstChoice = value.choices[0];
   if (!isRecord(firstChoice) || !isRecord(firstChoice.message)) return null;
   return typeof firstChoice.message.content === "string" ? firstChoice.message.content : null;
