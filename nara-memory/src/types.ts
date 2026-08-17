@@ -15,15 +15,15 @@ export interface NaraMemorySettings {
 
 export const DEFAULT_SETTINGS: NaraMemorySettings = {
   language: "fa",
-  apiBaseUrl: "https://router.bynara.id/v1",
+  apiBaseUrl: "https://api.openai.com/v1",
   apiKey: "",
-  chatModel: "deepseek-3.2",
+  chatModel: "gpt-4o-mini",
   chunkSize: 1000,
   chunkOverlap: 180,
   resultCount: 8,
   autoIndex: true,
   excludedFolders: "Templates,Archive",
-  systemPrompt: "You are Nara Memory, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
+  systemPrompt: "You are Omni AI Chat, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
 };
 
 export interface MemoryChunk {

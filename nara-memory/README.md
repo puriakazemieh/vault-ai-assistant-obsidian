@@ -1,33 +1,51 @@
-# Nara Memory for Obsidian
+# Omni AI Chat (Obsidian Plugin)
 
-نارا مموری همهٔ فایل‌های Markdown انتخاب‌شده در Vault را به قطعه‌های کوچک تقسیم می‌کند و یک حافظهٔ جستجوپذیرِ کاملاً محلی می‌سازد. سپس می‌توانید فایل فعال را با زمینهٔ یادداشت‌های مرتبط تحلیل کنید.
+Omni AI Chat (formerly Nara Memory) is a powerful Obsidian plugin that integrates local vector memory and advanced AI chat directly into your vault. It works with **any OpenAI-compatible API** (such as OpenAI, local LM Studio, Groq, OpenRouter, etc.).
 
-## راه‌اندازی
+## Features
+- **OpenAI Compatible**: Connect to any AI provider that supports the standard OpenAI `/v1` endpoints.
+- **Local Semantic Memory**: The plugin locally indexes your Obsidian vault in chunks and stores them in a memory database. No external databases are required.
+- **Context-Aware AI Chat**: Ask questions, and the plugin will retrieve relevant notes from your memory index and feed them into the chat context.
+- **Attachments**: Manually attach specific Markdown files from your vault to any conversation.
+- **Multi-language UI**: Switch the plugin UI between English (`en`) and Persian (`fa`) seamlessly from the settings.
+- **Session Management**: Automatically saves your chat histories and allows you to switch between previous sessions.
 
-1. `npm install` و سپس `npm run build` را داخل این پوشه اجرا کنید.
-2. `main.js`، `manifest.json` و `styles.css` را به `.obsidian/plugins/nara-memory/` در Vault منتقل کنید.
-3. پلاگین را فعال کنید و در Settings → Nara Memory، کلید API و نام مدل را وارد کنید. Base URL رسمی NaraRouter به‌صورت پیش‌فرض تنظیم شده است: `https://router.bynara.id/v1`.
-4. فرمان **Nara Memory: Rebuild vault memory index** را اجرا کنید.
+## Installation
 
-## قابلیت‌های گفتگو و حافظه
+### Manual Installation
+1. Go to the [Releases](#) page of this repository.
+2. Download the latest `main.js`, `manifest.json`, and `styles.css`.
+3. Create a folder named `omni-ai-chat` inside your `.obsidian/plugins/` directory.
+4. Place the downloaded files into that folder.
+5. Reload Obsidian and enable the plugin from `Settings -> Community Plugins`.
 
-- در تب **گفتگو** سؤال خود را بنویسید، فایل‌های Markdown را با «افزودن فایل» پیوست کنید و پاسخ را با ارجاع `[[path]]` دریافت کنید.
-- در ویرایشگر متن، بخش مورد نظر را انتخاب کنید و از Command palette یا منوی راست‌کلیک، **Ask Nara about selected text** را بزنید؛ سپس پرامپت خود را در گفتگو بنویسید.
-- در تب **مدیریت حافظه** می‌توانید هر فایل را «فراموش» کنید، همهٔ حافظه را پاک کنید، یا ایندکس را بازسازی کنید. این اعمال هرگز فایل اصلی Vault را حذف نمی‌کنند.
-- تاریخچهٔ ۱۰۰ پیام آخر و ایندکس حافظه در دادهٔ محلی افزونه ذخیره و بعد از بستن Obsidian حفظ می‌شود.
+### Using BRAT (Obsidian42-BRAT)
+1. Install the [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat).
+2. Open the command palette and run `BRAT: Add a beta plugin for testing`.
+3. Enter the URL of this GitHub repository.
+4. Enable the plugin in the Community Plugins tab.
 
-## بررسی اتصال
+## Configuration
 
-پس از وارد کردن کلید API، در Settings → Nara Memory دکمهٔ **تست اتصال** را بزنید. افزونه با `GET /v1/models` اتصال را بررسی می‌کند و فهرست مدل‌های مجاز حساب شما را در انتخاب‌گر Chat model نشان می‌دهد.
+Go to the Omni AI Chat settings page to configure the plugin:
+1. **Language / زبان**: Choose your preferred UI language.
+2. **API Base URL**: Enter the URL of your provider (e.g. `https://api.openai.com/v1`, or `http://localhost:1234/v1` for LM Studio).
+3. **API Key**: Your API key (if required by your provider).
+4. **Chat Model**: Click `Test Connection` to automatically fetch available models, then select the one you wish to use from the dropdown.
 
-## قرارداد API
-
-این نسخه از API سازگار با OpenAI در NaraRouter استفاده می‌کند:
-
-- `POST {baseUrl}/chat/completions` با `model` و `messages`، و پاسخ `choices[0].message.content`
-
-مستند رسمی NaraRouter endpoint embedding معرفی نمی‌کند، بنابراین ایندکس و بازیابی متن محلی است و مدل فقط برای تحلیل درخواست می‌شود.
-
-## حریم خصوصی
-
-متن قطعه‌ها و ایندکس روی دستگاه ذخیره می‌شوند و در زمان ایندکس چیزی به API ارسال نمی‌شود. تنها هنگام تحلیل، متن فایل فعال و قطعه‌های بازیابی‌شده به NaraRouter ارسال می‌شوند. پوشه‌های حساس را در **Excluded folders** وارد کنید.
+## Publishing to Obsidian Community Plugins
+If you wish to publish this plugin to the official community directory:
+1. Fork the [obsidian-releases](https://github.com/obsidianmd/obsidian-releases) repository.
+2. Clone your fork locally.
+3. Open `community-plugins.json` and add your plugin's information in alphabetical order:
+   ```json
+   {
+     "id": "omni-ai-chat",
+     "name": "Omni AI Chat",
+     "author": "Your Name",
+     "description": "Private vault memory, semantic search, and AI chat using any OpenAI-compatible API.",
+     "repo": "YourGitHubUsername/omni-ai-chat"
+   }
+   ```
+4. Commit your changes and push to your fork.
+5. Open a Pull Request on the official `obsidian-releases` repository. The Obsidian team will review it. Ensure that your GitHub repository has a valid release containing the `main.js`, `manifest.json`, and `styles.css` files.

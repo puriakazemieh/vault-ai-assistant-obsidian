@@ -1,7 +1,7 @@
 {
-  "name": "nara-memory",
-  "version": "0.2.0",
-  "description": "Obsidian semantic memory plugin for NaraRouter",
+  "name": "omni-ai-chat",
+  "version": "1.0.0",
+  "description": "Obsidian AI Chat and semantic memory plugin using OpenAI-compatible APIs",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

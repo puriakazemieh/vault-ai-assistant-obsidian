@@ -54,7 +54,7 @@ export default class NaraMemoryPlugin extends Plugin {
   async loadSettings(): Promise<void> {
     const data = await this.loadData() as { settings?: Partial<NaraMemorySettings> } | null;
     this.settings = { ...DEFAULT_SETTINGS, ...data?.settings };
-    if (!this.settings.apiBaseUrl) this.settings.apiBaseUrl = "https://router.bynara.id/v1";
+    if (!this.settings.apiBaseUrl) this.settings.apiBaseUrl = "https://api.openai.com/v1";
     if (!this.settings.language) this.settings.language = "fa";
   }
 
@@ -79,7 +79,7 @@ export default class NaraMemoryPlugin extends Plugin {
     const lang = this.settings.language;
     new Notice(t("main.rebuild.start", lang));
     try {
-      const result = await this.store.rebuild((done, total) => { if (done === total || done % 10 === 0) new Notice(`Nara Memory: ${done}/${total}`); });
+      const result = await this.store.rebuild((done, total) => { if (done === total || done % 10 === 0) new Notice(`Omni AI Chat: ${done}/${total}`); });
       new Notice(lang === "en" ? `Memory ready: ${result.files} files and ${result.chunks} chunks.` : `حافظه آماده است: ${result.files} فایل و ${result.chunks} قطعه.`);
       this.refreshViews();
     } catch (error) { new Notice(lang === "en" ? `Index failed: ${message(error)}` : `ایندکس ناموفق بود: ${message(error)}`); }
@@ -119,7 +119,7 @@ export default class NaraMemoryPlugin extends Plugin {
     } 
   }
   
-  private async indexFileQuietly(file: TFile): Promise<void> { try { await this.store.indexFile(file); this.refreshViews(); } catch (error) { console.warn("Nara Memory auto-index failed", file.path, error); } }
+  private async indexFileQuietly(file: TFile): Promise<void> { try { await this.store.indexFile(file); this.refreshViews(); } catch (error) { console.warn("Omni AI Chat auto-index failed", file.path, error); } }
   private refreshViews(): void { this.app.workspace.getLeavesOfType(VIEW_TYPE_NARA_MEMORY).forEach((leaf) => (leaf.view as NaraMemoryView).reRender()); }
 }
 

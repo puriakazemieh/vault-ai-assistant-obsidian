@@ -31,11 +31,11 @@ export const translations = {
     "settings.language.name": "Language / زبان",
     "settings.language.desc": "Choose plugin language / زبان افزونه را انتخاب کنید",
     "settings.connection.desc": "Click the button below to check connection.",
-    "settings.connection.help": "Index and memory remain on your device. Only when you run \"Analyze current file\" or chat, the text is sent to NaraRouter.",
-    "settings.baseUrl.name": "NaraRouter Base URL",
-    "settings.baseUrl.desc": "Official default: https://router.bynara.id/v1",
-    "settings.apiKey.name": "NaraRouter API Key",
-    "settings.apiKey.desc": "Get it from NaraRouter panel",
+    "settings.connection.help": "Index and memory remain on your device. Only when you run \"Analyze current file\" or chat, the text is sent to the API Provider.",
+    "settings.baseUrl.name": "API Base URL",
+    "settings.baseUrl.desc": "OpenAI compatible endpoint, e.g. https://api.openai.com/v1",
+    "settings.apiKey.name": "API Key",
+    "settings.apiKey.desc": "Get it from your API provider",
     "settings.testConnection.name": "Test connection and fetch models",
     "settings.testConnection.btn": "Test Connection",
     "settings.testConnection.btnConnecting": "Connecting...",
@@ -44,7 +44,7 @@ export const translations = {
     "settings.testConnection.success": "Connection successful!",
     "settings.testConnection.error": "Connection error:",
     "settings.chatModel.name": "Chat model",
-    "settings.chatModel.desc": "NaraRouter model for analysis and chat.",
+    "settings.chatModel.desc": "Model to use for analysis and chat.",
     "settings.autoIndex.name": "Auto-index changes",
     "settings.autoIndex.desc": "Update embedding after saving/creating notes.",
     "settings.excluded.name": "Excluded folders",
@@ -64,15 +64,15 @@ export const translations = {
     "settings.memory.clear.confirm": "Clear all indexed memory chunks?",
 
     // main.ts
-    "main.rebuild.start": "Nara Memory: Index rebuild started...",
+    "main.rebuild.start": "Omni AI Chat: Index rebuild started...",
     "main.command.sendSelection": "Send selection to chat",
     "main.command.sendSelection.error": "Please select some text first.",
     "main.command.analyze": "Analyze current file",
     "main.command.analyze.error": "No active file.",
 
     // nara-client.ts
-    "api.error.baseUrl": "Please enter NaraRouter Base URL in settings.",
-    "api.error.apiKey": "Please enter NaraRouter API Key in settings.",
+    "api.error.baseUrl": "Please enter API Base URL in settings.",
+    "api.error.apiKey": "Please enter API Key in settings.",
     "api.error.invalidResponse": "Invalid chat response."
   },
   fa: {
@@ -105,11 +105,11 @@ export const translations = {
     "settings.language.name": "Language / زبان",
     "settings.language.desc": "Choose plugin language / زبان افزونه را انتخاب کنید",
     "settings.connection.desc": "برای بررسی اتصال، دکمهٔ زیر را بزنید.",
-    "settings.connection.help": "ایندکس و حافظه روی دستگاه باقی می‌ماند. فقط وقتی «Analyze current file» را اجرا می‌کنید، متن فایل و نتایج مرتبط به NaraRouter فرستاده می‌شود.",
-    "settings.baseUrl.name": "NaraRouter Base URL",
-    "settings.baseUrl.desc": "پیش‌فرض رسمی NaraRouter: https://router.bynara.id/v1",
-    "settings.apiKey.name": "NaraRouter API Key",
-    "settings.apiKey.desc": "کلید را از پنل NaraRouter دریافت کنید",
+    "settings.connection.help": "ایندکس و حافظه روی دستگاه باقی می‌ماند. فقط وقتی «Analyze current file» را اجرا می‌کنید، متن فایل و نتایج مرتبط به سرور هوش مصنوعی فرستاده می‌شود.",
+    "settings.baseUrl.name": "API Base URL",
+    "settings.baseUrl.desc": "آدرس سازگار با OpenAI، مانند https://api.openai.com/v1",
+    "settings.apiKey.name": "API Key",
+    "settings.apiKey.desc": "کلید را از ارائه‌دهنده سرویس خود دریافت کنید",
     "settings.testConnection.name": "تست اتصال و دریافت مدل‌ها",
     "settings.testConnection.btn": "تست اتصال",
     "settings.testConnection.btnConnecting": "در حال اتصال…",
@@ -118,7 +118,7 @@ export const translations = {
     "settings.testConnection.success": "اتصال موفق!",
     "settings.testConnection.error": "خطا در اتصال:",
     "settings.chatModel.name": "Chat model",
-    "settings.chatModel.desc": "مدل NaraRouter برای تحلیل و گفتگو.",
+    "settings.chatModel.desc": "مدل برای تحلیل و گفتگو.",
     "settings.autoIndex.name": "Auto-index changes",
     "settings.autoIndex.desc": "بعد از ذخیره/ساخت یادداشت، embedding آن به‌روزرسانی می‌شود.",
     "settings.excluded.name": "Excluded folders",
@@ -138,15 +138,15 @@ export const translations = {
     "settings.memory.clear.confirm": "تمام قطعه‌های ایندکس‌شدهٔ حافظه پاک شوند؟",
 
     // main.ts
-    "main.rebuild.start": "Nara Memory: بازسازی ایندکس شروع شد…",
+    "main.rebuild.start": "Omni AI Chat: بازسازی ایندکس شروع شد…",
     "main.command.sendSelection": "ارسال بخش انتخاب‌شده به چت",
     "main.command.sendSelection.error": "ابتدا بخشی از متن را انتخاب کنید.",
     "main.command.analyze": "تحلیل این یادداشت (Analyze)",
     "main.command.analyze.error": "فایل فعالی وجود ندارد.",
 
     // nara-client.ts
-    "api.error.baseUrl": "NaraRouter Base URL را در تنظیمات وارد کنید.",
-    "api.error.apiKey": "NaraRouter API key را در تنظیمات وارد کنید.",
+    "api.error.baseUrl": "API Base URL را در تنظیمات وارد کنید.",
+    "api.error.apiKey": "API key را در تنظیمات وارد کنید.",
     "api.error.invalidResponse": "پاسخ chat نامعتبر است."
   }
 };
