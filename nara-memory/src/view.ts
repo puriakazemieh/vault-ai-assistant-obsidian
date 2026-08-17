@@ -55,9 +55,28 @@ export class NaraMemoryView extends ItemView {
                   this.attachedPaths = []; this.selectedText = ""; this.render();
                 });
           });
+          menu.addItem(item => {
+            item.setTitle(`حذف: ${session.title}`)
+                .setIcon("trash")
+                .onClick(() => {
+                  this.plugin.store.deleteSession(session.id);
+                  this.render();
+                });
+          });
+          menu.addSeparator();
         });
       }
       menu.showAtMouseEvent(event);
+    });
+
+    const deleteChatBtn = headerRight.createEl("button", { cls: "nara-header-action", title: "حذف این گفتگو" });
+    deleteChatBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
+    deleteChatBtn.addEventListener("click", () => {
+       const activeId = this.plugin.store.exportDatabase().activeSessionId;
+       if (activeId) {
+          this.plugin.store.deleteSession(activeId);
+          this.attachedPaths = []; this.selectedText = ""; this.render();
+       }
     });
 
     const newChatBtn = headerRight.createEl("button", { cls: "nara-header-action", title: "گفتگوی جدید" });
@@ -70,20 +89,29 @@ export class NaraMemoryView extends ItemView {
     const history = root.createDiv({ cls: "nara-memory-chat-history" });
     const messages = this.plugin.store.getChatMessages();
     if (!messages.length) history.createEl("p", { text: "یک سؤال بپرسید، فایل اضافه کنید، یا متن انتخاب‌شده را با فرمان افزونه به گفتگو بفرستید.", cls: "nara-memory-message" });
-    for (const message of messages) {
+    messages.forEach((message, index) => {
       const bubble = history.createDiv({ cls: `nara-memory-message nara-memory-message--${message.role}` });
       const body = bubble.createDiv();
       void MarkdownRenderer.render(this.plugin.app, message.content, body, "", this.plugin);
       
+      const actions = bubble.createDiv({ cls: "nara-message-actions" });
+      
       if (message.role === "assistant") {
-        const copyBtn = bubble.createEl("button", { cls: "nara-message-copy", title: "کپی متن" });
+        const copyBtn = actions.createEl("button", { cls: "nara-message-action-btn", title: "کپی متن" });
         copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
         copyBtn.addEventListener("click", () => {
           navigator.clipboard.writeText(message.content);
           new Notice("متن کپی شد");
         });
       }
-    }
+
+      const delBtn = actions.createEl("button", { cls: "nara-message-action-btn delete", title: "حذف پیام" });
+      delBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
+      delBtn.addEventListener("click", () => {
+        this.plugin.store.deleteMessage(index);
+        this.render();
+      });
+    });
     
     // Selection and attachments (System Blocks)
     if (this.selectedText) {

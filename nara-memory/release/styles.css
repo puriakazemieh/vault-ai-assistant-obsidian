@@ -67,7 +67,8 @@
   border-radius: 12px;
   width: fit-content;
   max-width: 85%;
-  user-select: text;
+  user-select: text !important;
+  -webkit-user-select: text !important;
   position: relative;
 }
 .nara-memory-message p { margin: 0 0 8px 0; }
@@ -88,10 +89,24 @@
   align-self: flex-end;
   border-bottom-left-radius: 4px;
 }
-.nara-message-copy {
+.nara-message-actions {
   position: absolute;
   bottom: -24px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.nara-memory-message--assistant .nara-message-actions {
   left: 4px;
+}
+.nara-memory-message--user .nara-message-actions {
+  right: 4px;
+}
+.nara-memory-message:hover .nara-message-actions {
+  opacity: 1;
+}
+.nara-message-action-btn {
   background: none;
   border: none;
   color: var(--text-muted);
@@ -101,15 +116,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
 }
-.nara-memory-message--assistant:hover .nara-message-copy {
-  opacity: 1;
-}
-.nara-message-copy:hover {
+.nara-message-action-btn:hover {
   color: var(--text-normal);
   background-color: var(--background-modifier-hover);
+}
+.nara-message-action-btn.delete:hover {
+  color: var(--text-error);
 }
 
 /* System/Execution Block */

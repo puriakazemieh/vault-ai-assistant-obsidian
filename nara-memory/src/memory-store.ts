@@ -132,6 +132,15 @@ export class MemoryStore {
     this.queuePersist(); 
   }
   
+  deleteMessage(index: number): void {
+    const session = this.database.activeSessionId ? this.database.sessions[this.database.activeSessionId] : null;
+    if (session && index >= 0 && index < session.messages.length) {
+      session.messages.splice(index, 1);
+      session.updatedAt = Date.now();
+      this.queuePersist();
+    }
+  }
+  
   getSessions(): ChatSession[] {
     return Object.values(this.database.sessions).sort((a, b) => b.updatedAt - a.updatedAt);
   }
