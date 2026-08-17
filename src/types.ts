@@ -23,7 +23,7 @@ export const DEFAULT_SETTINGS: NaraMemorySettings = {
   resultCount: 8,
   autoIndex: true,
   excludedFolders: "Templates,Archive",
-  systemPrompt: "You are Vault AI Assistant, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
+  systemPrompt: "You are Nara Memory, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
 };
 
 export interface MemoryChunk {

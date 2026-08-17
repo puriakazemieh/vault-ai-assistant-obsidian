@@ -1,6 +1,6 @@
 {
-  "name": "vault-ai-chat",
-  "version": "1.0.0",
+  "name": "nara-memory-obsidian",
+  "version": "1.0.1",
   "description": "Obsidian AI Chat and semantic memory plugin using OpenAI-compatible APIs",
   "main": "main.js",
   "scripts": {

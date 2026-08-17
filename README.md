@@ -1,51 +1,60 @@
-# Vault AI Assistant (Obsidian Plugin)
+# Nara Memory
 
-Vault AI Assistant (formerly Nara Memory) is a powerful Obsidian plugin that integrates local vector memory and advanced AI chat directly into your vault. It works with **any OpenAI-compatible API** (such as OpenAI, local LM Studio, Groq, OpenRouter, etc.).
+Local vault memory and context-aware AI chat for Obsidian.
+
+Nara Memory indexes Markdown notes locally, retrieves relevant passages when you ask a question, and sends only the chat request and selected context to the OpenAI-compatible provider that you configure.
 
 ## Features
-- **OpenAI Compatible**: Connect to any AI provider that supports the standard OpenAI `/v1` endpoints.
-- **Local Semantic Memory**: The plugin locally indexes your Obsidian vault in chunks and stores them in a memory database. No external databases are required.
-- **Context-Aware AI Chat**: Ask questions, and the plugin will retrieve relevant notes from your memory index and feed them into the chat context.
-- **Attachments**: Manually attach specific Markdown files from your vault to any conversation.
-- **Multi-language UI**: Switch the plugin UI between English (`en`) and Persian (`fa`) seamlessly from the settings.
-- **Session Management**: Automatically saves your chat histories and allows you to switch between previous sessions.
 
-## Installation
+- Local Markdown indexing and semantic-style retrieval without an external database.
+- Context-aware chat grounded in relevant notes from your vault.
+- Support for any OpenAI-compatible API, including OpenAI, OpenRouter, Groq, LM Studio, and self-hosted services.
+- Attach specific Markdown files or send selected text to a chat.
+- Rebuild, update, and clear the local memory index.
+- Saved chat sessions and English/Persian interface support.
 
-### Manual Installation
-1. Go to the [Releases](#) page of this repository.
-2. Download the latest `main.js`, `manifest.json`, and `styles.css`.
-3. Create a folder named `vault-ai-chat` inside your `.obsidian/plugins/` directory.
-4. Place the downloaded files into that folder.
-5. Reload Obsidian and enable the plugin from `Settings -> Community Plugins`.
+## Install
 
-### Using BRAT (Obsidian42-BRAT)
-1. Install the [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat).
-2. Open the command palette and run `BRAT: Add a beta plugin for testing`.
-3. Enter the URL of this GitHub repository.
-4. Enable the plugin in the Community Plugins tab.
+### From the Community plugins directory
 
-## Configuration
+Once accepted, open **Settings → Community plugins**, search for **Nara Memory**, then install and enable it.
 
-Go to the Vault AI Assistant settings page to configure the plugin:
-1. **Language / زبان**: Choose your preferred UI language.
-2. **API Base URL**: Enter the URL of your provider (e.g. `https://api.openai.com/v1`, or `http://localhost:1234/v1` for LM Studio).
-3. **API Key**: Your API key (if required by your provider).
-4. **Chat Model**: Click `Test Connection` to automatically fetch available models, then select the one you wish to use from the dropdown.
+### Manually from GitHub
 
-## Publishing to Obsidian Community Plugins
-If you wish to publish this plugin to the official community directory:
-1. Fork the [obsidian-releases](https://github.com/obsidianmd/obsidian-releases) repository.
-2. Clone your fork locally.
-3. Open `community-plugins.json` and add your plugin's information in alphabetical order:
-   ```json
-   {
-     "id": "vault-ai-chat",
-     "name": "Vault AI Assistant",
-     "author": "Your Name",
-     "description": "Private vault memory, semantic search, and AI chat using any OpenAI-compatible API.",
-     "repo": "puriakazemieh/vault-ai-assistant-obsidian"
-   }
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest GitHub release.
+2. Create this folder in your vault:
+
+   ```text
+   <vault>/.obsidian/plugins/vault-ai-chat/
    ```
-4. Commit your changes and push to your fork.
-5. Open a Pull Request on the official `obsidian-releases` repository. The Obsidian team will review it. Ensure that your GitHub repository has a valid release containing the `main.js`, `manifest.json`, and `styles.css` files.
+
+3. Copy the three files into that folder.
+4. Reload Obsidian and enable **Nara Memory** in **Settings → Community plugins**.
+
+## Setup and use
+
+1. Open **Nara Memory** from the ribbon icon or Command Palette.
+2. In the plugin settings, set your API base URL, API key, and chat model.
+3. Rebuild the vault memory index.
+4. Ask a question in the chat panel, or use **Analyze current file** / **Send selection to chat** from the Command Palette.
+
+## Privacy and network use
+
+- The index, indexed note chunks, settings, and chat history are stored locally in Obsidian plugin data.
+- The plugin connects to the API base URL that you configure. It uses that endpoint to list models and process chat or analysis requests.
+- When you send a chat or analysis request, the request includes your prompt and the relevant note excerpts, selected text, or explicitly attached files needed as context. Do not configure a provider you do not trust with that content.
+- Your API key is stored in the plugin's local data and sent only as a Bearer token to your configured API provider.
+- The plugin has no built-in telemetry, advertising, or payment service.
+
+## Development
+
+```powershell
+npm install
+npm run build
+```
+
+Release assets are `main.js`, `manifest.json`, and `styles.css`. Create a GitHub release with a tag exactly matching the version in `manifest.json`, then attach those three files.
+
+## License
+
+Licensed under the [MIT License](./LICENSE).
