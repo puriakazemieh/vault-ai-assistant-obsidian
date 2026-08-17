@@ -12,7 +12,7 @@ export class VaultAiClient {
     return `${base}${path}`;
   }
 
-  private async post<T>(path: string, body: unknown): Promise<T> {
+  private async post(path: string, body: unknown): Promise<unknown> {
     const settings = this.getSettings();
     if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     const response = await requestUrl({
@@ -26,15 +26,13 @@ export class VaultAiClient {
       throw: false
     });
     if (response.status < 200 || response.status >= 300) {
-      const detail = typeof response.json === "object" && response.json && "error" in response.json
-        ? JSON.stringify(response.json)
-        : response.text;
+      const detail = responseErrorDetail(response.json as unknown, response.text);
       throw new Error(`API request (${response.status}): ${detail || "request failed"}`);
     }
-    return response.json as T;
+    return response.json as unknown;
   }
 
-  private async get<T>(path: string): Promise<T> {
+  private async get(path: string): Promise<unknown> {
     const settings = this.getSettings();
     if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     const response = await requestUrl({
@@ -44,16 +42,20 @@ export class VaultAiClient {
       throw: false
     });
     if (response.status < 200 || response.status >= 300) throw new Error(`API request (${response.status}): ${response.text || "request failed"}`);
-    return response.json as T;
+    return response.json as unknown;
   }
 
   async listModels(): Promise<VaultAiModel[]> {
-    const data = await this.get<{ data?: Array<{ id?: string; name?: string }> }>("/models");
-    return (data.data ?? []).flatMap((model) => model.id ? [{ id: model.id, name: model.name }] : []);
+    const data = await this.get("/models");
+    if (!isRecord(data) || !Array.isArray(data.data)) return [];
+    return data.data.flatMap((model): VaultAiModel[] => {
+      if (!isRecord(model) || typeof model.id !== "string") return [];
+      return [{ id: model.id, name: typeof model.name === "string" ? model.name : undefined }];
+    });
   }
 
   async chat(system: string, user: string): Promise<string> {
-    const data = await this.post<{ choices?: Array<{ message?: { content?: string } }> }>("/chat/completions", {
+    const data = await this.post("/chat/completions", {
       model: this.getSettings().chatModel,
       temperature: 0.2,
       messages: [
@@ -61,8 +63,23 @@ export class VaultAiClient {
         { role: "user", content: user }
       ]
     });
-    const content = data.choices?.[0]?.message?.content;
+    const content = chatContent(data);
     if (!content) throw new Error(t("api.error.invalidResponse", this.getSettings().language));
     return content;
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function responseErrorDetail(json: unknown, fallback: string): string {
+  return isRecord(json) && "error" in json ? JSON.stringify(json) : fallback;
+}
+
+function chatContent(value: unknown): string | null {
+  if (!isRecord(value) || !Array.isArray(value.choices)) return null;
+  const firstChoice = value.choices[0];
+  if (!isRecord(firstChoice) || !isRecord(firstChoice.message)) return null;
+  return typeof firstChoice.message.content === "string" ? firstChoice.message.content : null;
 }

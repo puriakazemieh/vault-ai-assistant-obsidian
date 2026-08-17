@@ -20,6 +20,19 @@
   margin-bottom: 16px;
   color: var(--text-normal);
 }
+.vault-ai-header-title,
+.vault-ai-header-actions,
+.vault-ai-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vault-ai-header-actions {
+  gap: 4px;
+}
+.vault-ai-tool-group--right {
+  align-items: center;
+}
 .vault-ai-header-icon {
   color: var(--text-accent);
   display: flex;
@@ -68,7 +81,6 @@
   width: fit-content;
   max-width: 85%;
   user-select: text !important;
-  -webkit-user-select: text !important;
   cursor: text;
   position: relative;
 }
@@ -79,10 +91,9 @@
 .vault-ai-memory-message .markdown-rendered,
 .vault-ai-memory-message .markdown-rendered * {
   user-select: text !important;
-  -webkit-user-select: text !important;
   cursor: text;
 }
-.vault-ai-memory-message p { margin: 0 0 8px 0; user-select: text !important; -webkit-user-select: text !important; }
+.vault-ai-memory-message p { margin: 0 0 8px 0; user-select: text !important; }
 .vault-ai-memory-message p:last-child { margin: 0; }
 .vault-ai-memory-message strong { color: var(--text-normal); display: block; margin-bottom: 4px; font-size: 13px; opacity: 0.8; }
 .vault-ai-memory-message--user {
@@ -263,11 +274,14 @@
   background-color: var(--background-modifier-hover);
 }
 .vault-ai-loading {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 24px;
   height: 24px;
+}
+.vault-ai-loading.is-visible {
+  display: flex;
 }
 .vault-ai-dot-flashing {
   position: relative;

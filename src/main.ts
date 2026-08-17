@@ -24,13 +24,13 @@ export default class VaultAiMemoryPlugin extends Plugin {
     
     this.addCommand({ 
       id: "analyze-current-file", 
-      name: t("main.command.analyze", this.settings.language) as string, 
+      name: t("main.command.analyze", this.settings.language),
       callback: () => { void this.analyzeActiveFile(); } 
     });
     
     this.addCommand({ 
       id: "send-selection-to-chat", 
-      name: t("main.command.sendSelection", this.settings.language) as string, 
+      name: t("main.command.sendSelection", this.settings.language),
       editorCallback: (editor: Editor) => { void this.chatWithSelectedText(editor.getSelection()); } 
     });
     
@@ -49,7 +49,7 @@ export default class VaultAiMemoryPlugin extends Plugin {
     }));
   }
 
-  async onunload(): Promise<void> { await this.store.persistNow(); }
+  onunload(): void { void this.store.persistNow(); }
 
   async loadSettings(): Promise<void> {
     const data = await this.loadData() as { settings?: Partial<VaultAiMemorySettings> } | null;
@@ -66,13 +66,14 @@ export default class VaultAiMemoryPlugin extends Plugin {
     const leaf = existing ?? this.app.workspace.getRightLeaf(false);
     if (!leaf) throw new Error("Could not open a workspace leaf.");
     const view = await this.openMemoryView(leaf);
-    this.app.workspace.revealLeaf(leaf);
+    void this.app.workspace.revealLeaf(leaf);
     return view;
   }
 
   async openMemoryView(leaf: WorkspaceLeaf): Promise<VaultAiMemoryView> {
     await leaf.setViewState({ type: VIEW_TYPE_VAULT_AI_MEMORY, active: true });
-    return leaf.view as VaultAiMemoryView;
+    if (!(leaf.view instanceof VaultAiMemoryView)) throw new Error("Could not open AI Vault Memory view.");
+    return leaf.view;
   }
 
   async rebuildIndex(): Promise<void> {
@@ -120,7 +121,11 @@ export default class VaultAiMemoryPlugin extends Plugin {
   }
   
   private async indexFileQuietly(file: TFile): Promise<void> { try { await this.store.indexFile(file); this.refreshViews(); } catch (error) { console.warn("AI Vault Memory auto-index failed", file.path, error); } }
-  private refreshViews(): void { this.app.workspace.getLeavesOfType(VIEW_TYPE_VAULT_AI_MEMORY).forEach((leaf) => (leaf.view as VaultAiMemoryView).reRender()); }
+  private refreshViews(): void {
+    this.app.workspace.getLeavesOfType(VIEW_TYPE_VAULT_AI_MEMORY).forEach((leaf) => {
+      if (leaf.view instanceof VaultAiMemoryView) leaf.view.reRender();
+    });
+  }
 }
 
 function message(error: unknown): string { return error instanceof Error ? error.message : String(error); }

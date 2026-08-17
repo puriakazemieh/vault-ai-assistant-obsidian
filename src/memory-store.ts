@@ -11,23 +11,21 @@ export class MemoryStore {
   constructor(private readonly plugin: VaultAiMemoryPlugin) {}
 
   async load(): Promise<void> {
-    const data = await this.plugin.loadData() as { settings?: unknown; database?: any } | null;
-    let db = data?.database;
-    if (!db) {
+    const data: unknown = await this.plugin.loadData();
+    const database = isRecord(data) ? data.database : undefined;
+    if (!database) {
       this.database = structuredClone(EMPTY_DB);
       return;
     }
 
-    if (db.version === 4) {
-      this.database = db;
+    if (isMemoryDatabase(database)) {
+      this.database = database;
       return;
     }
 
-    // Migration from older versions
     this.database = structuredClone(EMPTY_DB);
-    this.database.chunks = db.chunks || {};
-    
-    const legacyMessages = db.chatMessages || [];
+    this.database.chunks = legacyChunks(database);
+    const legacyMessages = legacyChatMessages(database);
     if (legacyMessages.length > 0) {
       const sessionId = Date.now().toString();
       const title = legacyMessages[0].content.split("\n")[0].slice(0, 40) + "...";
@@ -165,9 +163,8 @@ export class MemoryStore {
   async rebuild(onProgress?: (done: number, total: number) => void): Promise<{ files: number; chunks: number }> {
     this.reset();
     const files = this.plugin.app.vault.getMarkdownFiles().filter((file) => this.isIncluded(file));
-    let chunks = 0;
     for (let index = 0; index < files.length; index++) {
-      chunks += await this.indexFile(files[index]);
+      await this.indexFile(files[index]);
       onProgress?.(index + 1, files.length);
     }
     await this.persistNow();
@@ -241,4 +238,59 @@ function localScore(chunk: MemoryChunk, queryTerms: string[], titleTerms: Set<st
     if (titleTerms.has(term) && text.includes(term)) titleMatches++;
   }
   return (matches / queryTerms.length) + (titleMatches * 0.25);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isMemoryChunk(value: unknown): value is MemoryChunk {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "string"
+    && typeof value.filePath === "string"
+    && typeof value.heading === "string"
+    && typeof value.text === "string"
+    && typeof value.hash === "string"
+    && typeof value.updatedAt === "number"
+    && Array.isArray(value.terms)
+    && value.terms.every((term) => typeof term === "string");
+}
+
+function isChatMessage(value: unknown): value is ChatMessage {
+  return isRecord(value)
+    && (value.role === "user" || value.role === "assistant")
+    && typeof value.content === "string"
+    && typeof value.createdAt === "number";
+}
+
+function isChatSession(value: unknown): value is ChatSession {
+  return isRecord(value)
+    && typeof value.id === "string"
+    && typeof value.title === "string"
+    && typeof value.updatedAt === "number"
+    && Array.isArray(value.messages)
+    && value.messages.every(isChatMessage);
+}
+
+function isMemoryDatabase(value: unknown): value is MemoryDatabase {
+  if (!isRecord(value) || value.version !== 4 || (typeof value.activeSessionId !== "string" && value.activeSessionId !== null)) return false;
+  return isChunkRecord(value.chunks) && isSessionRecord(value.sessions);
+}
+
+function isChunkRecord(value: unknown): value is Record<string, MemoryChunk> {
+  return isRecord(value) && Object.values(value).every(isMemoryChunk);
+}
+
+function isSessionRecord(value: unknown): value is Record<string, ChatSession> {
+  return isRecord(value) && Object.values(value).every(isChatSession);
+}
+
+function legacyChunks(value: unknown): Record<string, MemoryChunk> {
+  return isRecord(value) && isChunkRecord(value.chunks) ? value.chunks : {};
+}
+
+function legacyChatMessages(value: unknown): ChatMessage[] {
+  return isRecord(value) && Array.isArray(value.chatMessages)
+    ? value.chatMessages.filter(isChatMessage)
+    : [];
 }
