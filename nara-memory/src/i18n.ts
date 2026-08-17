@@ -64,7 +64,7 @@ export const translations = {
     "settings.memory.clear.confirm": "Clear all indexed memory chunks?",
 
     // main.ts
-    "main.rebuild.start": "Omni AI Chat: Index rebuild started...",
+    "main.rebuild.start": "Vault AI Assistant: Index rebuild started...",
     "main.command.sendSelection": "Send selection to chat",
     "main.command.sendSelection.error": "Please select some text first.",
     "main.command.analyze": "Analyze current file",
@@ -138,7 +138,7 @@ export const translations = {
     "settings.memory.clear.confirm": "تمام قطعه‌های ایندکس‌شدهٔ حافظه پاک شوند؟",
 
     // main.ts
-    "main.rebuild.start": "Omni AI Chat: بازسازی ایندکس شروع شد…",
+    "main.rebuild.start": "Vault AI Assistant: بازسازی ایندکس شروع شد…",
     "main.command.sendSelection": "ارسال بخش انتخاب‌شده به چت",
     "main.command.sendSelection.error": "ابتدا بخشی از متن را انتخاب کنید.",
     "main.command.analyze": "تحلیل این یادداشت (Analyze)",

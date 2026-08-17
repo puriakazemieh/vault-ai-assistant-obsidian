@@ -11,7 +11,7 @@ export class NaraMemoryView extends ItemView {
 
   constructor(leaf: WorkspaceLeaf, private readonly plugin: NaraMemoryPlugin) { super(leaf); }
   getViewType(): string { return VIEW_TYPE_NARA_MEMORY; }
-  getDisplayText(): string { return "Omni AI Chat"; }
+  getDisplayText(): string { return "Vault AI Assistant"; }
   getIcon(): string { return "brain-circuit"; }
   async onOpen(): Promise<void> { this.render(); }
 

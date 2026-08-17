@@ -1,5 +1,5 @@
 {
-  "name": "omni-ai-chat",
+  "name": "vault-ai-assistant",
   "version": "1.0.0",
   "description": "Obsidian AI Chat and semantic memory plugin using OpenAI-compatible APIs",
   "main": "main.js",

@@ -1,6 +1,6 @@
-# Omni AI Chat (Obsidian Plugin)
+# Vault AI Assistant (Obsidian Plugin)
 
-Omni AI Chat (formerly Nara Memory) is a powerful Obsidian plugin that integrates local vector memory and advanced AI chat directly into your vault. It works with **any OpenAI-compatible API** (such as OpenAI, local LM Studio, Groq, OpenRouter, etc.).
+Vault AI Assistant (formerly Nara Memory) is a powerful Obsidian plugin that integrates local vector memory and advanced AI chat directly into your vault. It works with **any OpenAI-compatible API** (such as OpenAI, local LM Studio, Groq, OpenRouter, etc.).
 
 ## Features
 - **OpenAI Compatible**: Connect to any AI provider that supports the standard OpenAI `/v1` endpoints.
@@ -15,7 +15,7 @@ Omni AI Chat (formerly Nara Memory) is a powerful Obsidian plugin that integrate
 ### Manual Installation
 1. Go to the [Releases](#) page of this repository.
 2. Download the latest `main.js`, `manifest.json`, and `styles.css`.
-3. Create a folder named `omni-ai-chat` inside your `.obsidian/plugins/` directory.
+3. Create a folder named `vault-ai-assistant` inside your `.obsidian/plugins/` directory.
 4. Place the downloaded files into that folder.
 5. Reload Obsidian and enable the plugin from `Settings -> Community Plugins`.
 
@@ -27,7 +27,7 @@ Omni AI Chat (formerly Nara Memory) is a powerful Obsidian plugin that integrate
 
 ## Configuration
 
-Go to the Omni AI Chat settings page to configure the plugin:
+Go to the Vault AI Assistant settings page to configure the plugin:
 1. **Language / زبان**: Choose your preferred UI language.
 2. **API Base URL**: Enter the URL of your provider (e.g. `https://api.openai.com/v1`, or `http://localhost:1234/v1` for LM Studio).
 3. **API Key**: Your API key (if required by your provider).
@@ -40,11 +40,11 @@ If you wish to publish this plugin to the official community directory:
 3. Open `community-plugins.json` and add your plugin's information in alphabetical order:
    ```json
    {
-     "id": "omni-ai-chat",
-     "name": "Omni AI Chat",
+     "id": "vault-ai-assistant",
+     "name": "Vault AI Assistant",
      "author": "Your Name",
      "description": "Private vault memory, semantic search, and AI chat using any OpenAI-compatible API.",
-     "repo": "YourGitHubUsername/omni-ai-chat"
+     "repo": "YourGitHubUsername/vault-ai-assistant"
    }
    ```
 4. Commit your changes and push to your fork.

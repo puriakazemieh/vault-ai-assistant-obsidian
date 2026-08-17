@@ -14,7 +14,7 @@ export class NaraMemorySettingsTab extends PluginSettingTab {
     const { containerEl } = this;
     const lang = this.plugin.settings.language;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Omni AI Chat" });
+    containerEl.createEl("h2", { text: "Vault AI Assistant" });
     
     new Setting(containerEl)
       .setName(t("settings.language.name", lang))
