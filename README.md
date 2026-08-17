@@ -15,7 +15,7 @@ Vault AI Assistant (formerly Nara Memory) is a powerful Obsidian plugin that int
 ### Manual Installation
 1. Go to the [Releases](#) page of this repository.
 2. Download the latest `main.js`, `manifest.json`, and `styles.css`.
-3. Create a folder named `vault-ai-assistant-obsidian` inside your `.obsidian/plugins/` directory.
+3. Create a folder named `vault-ai-chat` inside your `.obsidian/plugins/` directory.
 4. Place the downloaded files into that folder.
 5. Reload Obsidian and enable the plugin from `Settings -> Community Plugins`.
 
@@ -40,11 +40,11 @@ If you wish to publish this plugin to the official community directory:
 3. Open `community-plugins.json` and add your plugin's information in alphabetical order:
    ```json
    {
-     "id": "vault-ai-assistant-obsidian",
+     "id": "vault-ai-chat",
      "name": "Vault AI Assistant",
      "author": "Your Name",
      "description": "Private vault memory, semantic search, and AI chat using any OpenAI-compatible API.",
-     "repo": "YourGitHubUsername/vault-ai-assistant-obsidian"
+     "repo": "puriakazemieh/vault-ai-assistant-obsidian"
    }
    ```
 4. Commit your changes and push to your fork.
