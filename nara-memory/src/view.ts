@@ -96,14 +96,12 @@ export class NaraMemoryView extends ItemView {
       
       const actions = bubble.createDiv({ cls: "nara-message-actions" });
       
-      if (message.role === "assistant") {
-        const copyBtn = actions.createEl("button", { cls: "nara-message-action-btn", title: "کپی متن" });
-        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
-        copyBtn.addEventListener("click", () => {
-          navigator.clipboard.writeText(message.content);
-          new Notice("متن کپی شد");
-        });
-      }
+      const copyBtn = actions.createEl("button", { cls: "nara-message-action-btn", title: "کپی متن" });
+      copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(message.content);
+        new Notice("متن کپی شد");
+      });
 
       const delBtn = actions.createEl("button", { cls: "nara-message-action-btn delete", title: "حذف پیام" });
       delBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;

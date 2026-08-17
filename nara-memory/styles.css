@@ -69,7 +69,12 @@
   max-width: 85%;
   user-select: text !important;
   -webkit-user-select: text !important;
+  cursor: text;
   position: relative;
+}
+.nara-memory-message * {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 .nara-memory-message p { margin: 0 0 8px 0; }
 .nara-memory-message p:last-child { margin: 0; }
