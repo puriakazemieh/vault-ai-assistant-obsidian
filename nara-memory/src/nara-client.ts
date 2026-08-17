@@ -1,18 +1,20 @@
 import { requestUrl } from "obsidian";
 import type { NaraMemorySettings, NaraModel } from "./types";
+import { t } from "./i18n";
 
 export class NaraClient {
   constructor(private readonly getSettings: () => NaraMemorySettings) {}
 
   private endpoint(path: string): string {
-    const base = this.getSettings().apiBaseUrl.trim().replace(/\/$/, "");
-    if (!base) throw new Error("NaraRouter Base URL را در تنظیمات وارد کنید.");
+    const settings = this.getSettings();
+    const base = settings.apiBaseUrl.trim().replace(/\/$/, "");
+    if (!base) throw new Error(t("api.error.baseUrl", settings.language));
     return `${base}${path}`;
   }
 
   private async post<T>(path: string, body: unknown): Promise<T> {
     const settings = this.getSettings();
-    if (!settings.apiKey.trim()) throw new Error("NaraRouter API key را در تنظیمات وارد کنید.");
+    if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     const response = await requestUrl({
       url: this.endpoint(path),
       method: "POST",
@@ -34,7 +36,7 @@ export class NaraClient {
 
   private async get<T>(path: string): Promise<T> {
     const settings = this.getSettings();
-    if (!settings.apiKey.trim()) throw new Error("NaraRouter API key را در تنظیمات وارد کنید.");
+    if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     const response = await requestUrl({
       url: this.endpoint(path),
       method: "GET",
@@ -60,7 +62,7 @@ export class NaraClient {
       ]
     });
     const content = data.choices?.[0]?.message?.content;
-    if (!content) throw new Error("پاسخ chat نامعتبر است.");
+    if (!content) throw new Error(t("api.error.invalidResponse", this.getSettings().language));
     return content;
   }
 }

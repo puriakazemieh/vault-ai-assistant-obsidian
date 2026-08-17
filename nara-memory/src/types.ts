@@ -1,4 +1,7 @@
+import type { Language } from "./i18n";
+
 export interface NaraMemorySettings {
+  language: Language;
   apiBaseUrl: string;
   apiKey: string;
   chatModel: string;
@@ -11,14 +14,15 @@ export interface NaraMemorySettings {
 }
 
 export const DEFAULT_SETTINGS: NaraMemorySettings = {
+  language: "fa",
   apiBaseUrl: "https://router.bynara.id/v1",
   apiKey: "",
   chatModel: "deepseek-3.2",
-  chunkSize: 1200,
+  chunkSize: 1000,
   chunkOverlap: 180,
   resultCount: 8,
   autoIndex: true,
-  excludedFolders: ".obsidian, .git",
+  excludedFolders: "Templates,Archive",
   systemPrompt: "You are Nara Memory, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
 };
 
