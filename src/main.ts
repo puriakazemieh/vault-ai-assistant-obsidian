@@ -17,7 +17,7 @@ export default class NaraMemoryPlugin extends Plugin {
     this.registerView(VIEW_TYPE_NARA_MEMORY, (leaf) => new NaraMemoryView(leaf, this));
     
     // Commands and Ribbons using translation
-    this.addRibbonIcon("brain-circuit", "Open Nara Memory", () => { void this.activateMemoryView(); });
+    this.addRibbonIcon("brain-circuit", "Open Nara AI Vault Memory", () => { void this.activateMemoryView(); });
     this.addCommand({ id: "open-memory", name: "Open memory search", callback: () => { void this.activateMemoryView(); } });
     this.addCommand({ id: "rebuild-memory", name: "Rebuild vault memory index", callback: () => { void this.rebuildIndex(); } });
     this.addCommand({ id: "index-current-file", name: "Index current file", callback: () => { void this.indexActiveFile(); } });
@@ -79,7 +79,7 @@ export default class NaraMemoryPlugin extends Plugin {
     const lang = this.settings.language;
     new Notice(t("main.rebuild.start", lang));
     try {
-      const result = await this.store.rebuild((done, total) => { if (done === total || done % 10 === 0) new Notice(`Nara Memory: ${done}/${total}`); });
+      const result = await this.store.rebuild((done, total) => { if (done === total || done % 10 === 0) new Notice(`Nara AI Vault Memory: ${done}/${total}`); });
       new Notice(lang === "en" ? `Memory ready: ${result.files} files and ${result.chunks} chunks.` : `حافظه آماده است: ${result.files} فایل و ${result.chunks} قطعه.`);
       this.refreshViews();
     } catch (error) { new Notice(lang === "en" ? `Index failed: ${message(error)}` : `ایندکس ناموفق بود: ${message(error)}`); }
@@ -119,7 +119,7 @@ export default class NaraMemoryPlugin extends Plugin {
     } 
   }
   
-  private async indexFileQuietly(file: TFile): Promise<void> { try { await this.store.indexFile(file); this.refreshViews(); } catch (error) { console.warn("Nara Memory auto-index failed", file.path, error); } }
+  private async indexFileQuietly(file: TFile): Promise<void> { try { await this.store.indexFile(file); this.refreshViews(); } catch (error) { console.warn("Nara AI Vault Memory auto-index failed", file.path, error); } }
   private refreshViews(): void { this.app.workspace.getLeavesOfType(VIEW_TYPE_NARA_MEMORY).forEach((leaf) => (leaf.view as NaraMemoryView).reRender()); }
 }
 

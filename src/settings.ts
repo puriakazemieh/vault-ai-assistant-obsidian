@@ -14,7 +14,7 @@ export class NaraMemorySettingsTab extends PluginSettingTab {
     const { containerEl } = this;
     const lang = this.plugin.settings.language;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Nara Memory" });
+    containerEl.createEl("h2", { text: "Nara AI Vault Memory" });
     
     new Setting(containerEl)
       .setName(t("settings.language.name", lang))

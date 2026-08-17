@@ -1,8 +1,8 @@
-# Nara Memory
+# Nara AI Vault Memory
 
 Local vault memory and context-aware AI chat for Obsidian.
 
-Nara Memory indexes Markdown notes locally, retrieves relevant passages when you ask a question, and sends only the chat request and selected context to the OpenAI-compatible provider that you configure.
+Nara AI Vault Memory indexes Markdown notes locally, retrieves relevant passages when you ask a question, and sends only the chat request and selected context to the OpenAI-compatible provider that you configure.
 
 ## Features
 
@@ -17,7 +17,7 @@ Nara Memory indexes Markdown notes locally, retrieves relevant passages when you
 
 ### From the Community plugins directory
 
-Once accepted, open **Settings → Community plugins**, search for **Nara Memory**, then install and enable it.
+Once accepted, open **Settings → Community plugins**, search for **Nara AI Vault Memory**, then install and enable it.
 
 ### Manually from GitHub
 
@@ -29,11 +29,11 @@ Once accepted, open **Settings → Community plugins**, search for **Nara Memory
    ```
 
 3. Copy the three files into that folder.
-4. Reload Obsidian and enable **Nara Memory** in **Settings → Community plugins**.
+4. Reload Obsidian and enable **Nara AI Vault Memory** in **Settings → Community plugins**.
 
 ## Setup and use
 
-1. Open **Nara Memory** from the ribbon icon or Command Palette.
+1. Open **Nara AI Vault Memory** from the ribbon icon or Command Palette.
 2. In the plugin settings, set your API base URL, API key, and chat model.
 3. Rebuild the vault memory index.
 4. Ask a question in the chat panel, or use **Analyze current file** / **Send selection to chat** from the Command Palette.
