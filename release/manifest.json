@@ -1,7 +1,7 @@
 {
   "id": "vault-ai-chat",
-  "name": "Nara AI Vault Memory",
-  "version": "1.0.3",
+  "name": "AI Vault Memory",
+  "version": "1.0.4",
   "minAppVersion": "1.5.0",
   "description": "AI-powered local vault memory and context-aware chat with any OpenAI-compatible API.",
   "author": "Puria Kazemieh",

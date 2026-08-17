@@ -1,9 +1,9 @@
 import { requestUrl } from "obsidian";
-import type { NaraMemorySettings, NaraModel } from "./types";
+import type { VaultAiMemorySettings, VaultAiModel } from "./types";
 import { t } from "./i18n";
 
-export class NaraClient {
-  constructor(private readonly getSettings: () => NaraMemorySettings) {}
+export class VaultAiClient {
+  constructor(private readonly getSettings: () => VaultAiMemorySettings) {}
 
   private endpoint(path: string): string {
     const settings = this.getSettings();
@@ -29,7 +29,7 @@ export class NaraClient {
       const detail = typeof response.json === "object" && response.json && "error" in response.json
         ? JSON.stringify(response.json)
         : response.text;
-      throw new Error(`NaraRouter (${response.status}): ${detail || "request failed"}`);
+      throw new Error(`API request (${response.status}): ${detail || "request failed"}`);
     }
     return response.json as T;
   }
@@ -43,11 +43,11 @@ export class NaraClient {
       headers: { "Authorization": `Bearer ${settings.apiKey.trim()}` },
       throw: false
     });
-    if (response.status < 200 || response.status >= 300) throw new Error(`NaraRouter (${response.status}): ${response.text || "request failed"}`);
+    if (response.status < 200 || response.status >= 300) throw new Error(`API request (${response.status}): ${response.text || "request failed"}`);
     return response.json as T;
   }
 
-  async listModels(): Promise<NaraModel[]> {
+  async listModels(): Promise<VaultAiModel[]> {
     const data = await this.get<{ data?: Array<{ id?: string; name?: string }> }>("/models");
     return (data.data ?? []).flatMap((model) => model.id ? [{ id: model.id, name: model.name }] : []);
   }

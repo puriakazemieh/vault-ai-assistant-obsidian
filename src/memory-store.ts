@@ -1,5 +1,5 @@
 import { TFile, normalizePath } from "obsidian";
-import type NaraMemoryPlugin from "./main";
+import type VaultAiMemoryPlugin from "./main";
 import type { ChatMessage, ChatSession, MemoryChunk, MemoryDatabase, SearchResult } from "./types";
 
 const EMPTY_DB: MemoryDatabase = { version: 4, chunks: {}, sessions: {}, activeSessionId: null };
@@ -8,7 +8,7 @@ export class MemoryStore {
   private database: MemoryDatabase = structuredClone(EMPTY_DB);
   private saveTimer: number | null = null;
 
-  constructor(private readonly plugin: NaraMemoryPlugin) {}
+  constructor(private readonly plugin: VaultAiMemoryPlugin) {}
 
   async load(): Promise<void> {
     const data = await this.plugin.loadData() as { settings?: unknown; database?: any } | null;

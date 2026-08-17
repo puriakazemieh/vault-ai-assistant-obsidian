@@ -64,13 +64,13 @@ export const translations = {
     "settings.memory.clear.confirm": "Clear all indexed memory chunks?",
 
     // main.ts
-    "main.rebuild.start": "Nara AI Vault Memory: Index rebuild started...",
+    "main.rebuild.start": "AI Vault Memory: Index rebuild started...",
     "main.command.sendSelection": "Send selection to chat",
     "main.command.sendSelection.error": "Please select some text first.",
     "main.command.analyze": "Analyze current file",
     "main.command.analyze.error": "No active file.",
 
-    // nara-client.ts
+    // vault-ai-client.ts
     "api.error.baseUrl": "Please enter API Base URL in settings.",
     "api.error.apiKey": "Please enter API Key in settings.",
     "api.error.invalidResponse": "Invalid chat response."
@@ -138,13 +138,13 @@ export const translations = {
     "settings.memory.clear.confirm": "تمام قطعه‌های ایندکس‌شدهٔ حافظه پاک شوند؟",
 
     // main.ts
-    "main.rebuild.start": "Nara AI Vault Memory: بازسازی ایندکس شروع شد…",
+    "main.rebuild.start": "AI Vault Memory: بازسازی ایندکس شروع شد…",
     "main.command.sendSelection": "ارسال بخش انتخاب‌شده به چت",
     "main.command.sendSelection.error": "ابتدا بخشی از متن را انتخاب کنید.",
     "main.command.analyze": "تحلیل این یادداشت (Analyze)",
     "main.command.analyze.error": "فایل فعالی وجود ندارد.",
 
-    // nara-client.ts
+    // vault-ai-client.ts
     "api.error.baseUrl": "API Base URL را در تنظیمات وارد کنید.",
     "api.error.apiKey": "API key را در تنظیمات وارد کنید.",
     "api.error.invalidResponse": "پاسخ chat نامعتبر است."

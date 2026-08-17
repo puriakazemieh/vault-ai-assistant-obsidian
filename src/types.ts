@@ -1,6 +1,6 @@
 import type { Language } from "./i18n";
 
-export interface NaraMemorySettings {
+export interface VaultAiMemorySettings {
   language: Language;
   apiBaseUrl: string;
   apiKey: string;
@@ -13,7 +13,7 @@ export interface NaraMemorySettings {
   systemPrompt: string;
 }
 
-export const DEFAULT_SETTINGS: NaraMemorySettings = {
+export const DEFAULT_SETTINGS: VaultAiMemorySettings = {
   language: "fa",
   apiBaseUrl: "https://api.openai.com/v1",
   apiKey: "",
@@ -23,7 +23,7 @@ export const DEFAULT_SETTINGS: NaraMemorySettings = {
   resultCount: 8,
   autoIndex: true,
   excludedFolders: "Templates,Archive",
-  systemPrompt: "You are Nara AI Vault Memory, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
+  systemPrompt: "You are AI Vault Memory, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
 };
 
 export interface MemoryChunk {
@@ -60,7 +60,7 @@ export interface MemoryDatabase {
   activeSessionId: string | null;
 }
 
-export interface NaraModel {
+export interface VaultAiModel {
   id: string;
   name?: string;
 }

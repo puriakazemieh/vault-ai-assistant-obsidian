@@ -1,20 +1,20 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import type NaraMemoryPlugin from "./main";
-import type { NaraModel } from "./types";
+import type VaultAiMemoryPlugin from "./main";
+import type { VaultAiModel } from "./types";
 import { DEFAULT_SETTINGS } from "./types";
 import { t, Language } from "./i18n";
 
-export class NaraMemorySettingsTab extends PluginSettingTab {
-  private models: NaraModel[] = [];
+export class VaultAiMemorySettingsTab extends PluginSettingTab {
+  private models: VaultAiModel[] = [];
   private connectionMessage = "";
   
-  constructor(app: App, private readonly plugin: NaraMemoryPlugin) { super(app, plugin); }
+  constructor(app: App, private readonly plugin: VaultAiMemoryPlugin) { super(app, plugin); }
 
   display(): void {
     const { containerEl } = this;
     const lang = this.plugin.settings.language;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Nara AI Vault Memory" });
+    containerEl.createEl("h2", { text: "AI Vault Memory" });
     
     new Setting(containerEl)
       .setName(t("settings.language.name", lang))
@@ -36,7 +36,7 @@ export class NaraMemorySettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName(t("settings.baseUrl.name", lang))
       .setDesc(t("settings.baseUrl.desc", lang))
-      .addText((text) => text.setPlaceholder("https://router.bynara.id/v1").setValue(this.plugin.settings.apiBaseUrl).onChange(async (value) => { this.plugin.settings.apiBaseUrl = value.trim(); await this.plugin.saveSettings(); }));
+      .addText((text) => text.setPlaceholder("https://api.openai.com/v1").setValue(this.plugin.settings.apiBaseUrl).onChange(async (value) => { this.plugin.settings.apiBaseUrl = value.trim(); await this.plugin.saveSettings(); }));
       
     new Setting(containerEl)
       .setName(t("settings.apiKey.name", lang))

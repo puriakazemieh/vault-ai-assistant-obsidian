@@ -1,17 +1,17 @@
 import { FuzzySuggestModal, ItemView, MarkdownRenderer, Notice, TFile, WorkspaceLeaf, Menu } from "obsidian";
-import type NaraMemoryPlugin from "./main";
+import type VaultAiMemoryPlugin from "./main";
 import { t } from "./i18n";
 
-export const VIEW_TYPE_NARA_MEMORY = "nara-memory-view";
+export const VIEW_TYPE_VAULT_AI_MEMORY = "vault-ai-memory-view";
 
-export class NaraMemoryView extends ItemView {
+export class VaultAiMemoryView extends ItemView {
   private attachedPaths: string[] = [];
   private selectedText = "";
   private isThinking = false;
 
-  constructor(leaf: WorkspaceLeaf, private readonly plugin: NaraMemoryPlugin) { super(leaf); }
-  getViewType(): string { return VIEW_TYPE_NARA_MEMORY; }
-  getDisplayText(): string { return "Nara AI Vault Memory"; }
+  constructor(leaf: WorkspaceLeaf, private readonly plugin: VaultAiMemoryPlugin) { super(leaf); }
+  getViewType(): string { return VIEW_TYPE_VAULT_AI_MEMORY; }
+  getDisplayText(): string { return "AI Vault Memory"; }
   getIcon(): string { return "brain-circuit"; }
   async onOpen(): Promise<void> { this.render(); }
 
@@ -24,7 +24,7 @@ export class NaraMemoryView extends ItemView {
     root.empty();
     const lang = this.plugin.settings.language;
 
-    const header = root.createDiv({ cls: "nara-memory-header" });
+    const header = root.createDiv({ cls: "vault-ai-memory-header" });
     const titleArea = header.createDiv();
     titleArea.style.display = "flex";
     titleArea.style.alignItems = "center";
@@ -37,7 +37,7 @@ export class NaraMemoryView extends ItemView {
     headerRight.style.display = "flex";
     headerRight.style.gap = "4px";
 
-    const historyBtn = headerRight.createEl("button", { cls: "nara-header-action", title: t("history.title", lang) });
+    const historyBtn = headerRight.createEl("button", { cls: "vault-ai-header-action", title: t("history.title", lang) });
     historyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
     historyBtn.addEventListener("click", (event) => {
       const menu = new Menu();
@@ -76,7 +76,7 @@ export class NaraMemoryView extends ItemView {
       menu.showAtMouseEvent(event);
     });
 
-    const deleteChatBtn = headerRight.createEl("button", { cls: "nara-header-action", title: t("chat.deleteCurrent", lang) });
+    const deleteChatBtn = headerRight.createEl("button", { cls: "vault-ai-header-action", title: t("chat.deleteCurrent", lang) });
     deleteChatBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
     deleteChatBtn.addEventListener("click", () => {
        const activeId = this.plugin.store.exportDatabase().activeSessionId;
@@ -86,7 +86,7 @@ export class NaraMemoryView extends ItemView {
        }
     });
 
-    const newChatBtn = headerRight.createEl("button", { cls: "nara-header-action", title: t("chat.new", lang) });
+    const newChatBtn = headerRight.createEl("button", { cls: "vault-ai-header-action", title: t("chat.new", lang) });
     newChatBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
     newChatBtn.addEventListener("click", () => { this.plugin.store.clearChat(); this.attachedPaths = []; this.selectedText = ""; this.render(); });
     this.renderChat(root);
@@ -94,26 +94,26 @@ export class NaraMemoryView extends ItemView {
 
   private renderChat(root: HTMLElement): void {
     const lang = this.plugin.settings.language;
-    const history = root.createDiv({ cls: "nara-memory-chat-history" });
+    const history = root.createDiv({ cls: "vault-ai-memory-chat-history" });
     const messages = this.plugin.store.getChatMessages();
-    if (!messages.length) history.createEl("p", { text: t("chat.emptyPlaceholder", lang), cls: "nara-memory-message" });
+    if (!messages.length) history.createEl("p", { text: t("chat.emptyPlaceholder", lang), cls: "vault-ai-memory-message" });
     messages.forEach((message, index) => {
-      const bubble = history.createDiv({ cls: `nara-memory-message nara-memory-message--${message.role}` });
+      const bubble = history.createDiv({ cls: `vault-ai-memory-message vault-ai-memory-message--${message.role}` });
       const body = bubble.createDiv({ cls: "markdown-rendered" });
       body.style.userSelect = "text";
       body.style.webkitUserSelect = "text";
       void MarkdownRenderer.render(this.plugin.app, message.content, body, "", this.plugin);
       
-      const actions = bubble.createDiv({ cls: "nara-message-actions" });
+      const actions = bubble.createDiv({ cls: "vault-ai-message-actions" });
       
-      const copyBtn = actions.createEl("button", { cls: "nara-message-action-btn", title: t("chat.copyTooltip", lang) });
+      const copyBtn = actions.createEl("button", { cls: "vault-ai-message-action-btn", title: t("chat.copyTooltip", lang) });
       copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(message.content);
         new Notice(t("chat.copied", lang));
       });
 
-      const delBtn = actions.createEl("button", { cls: "nara-message-action-btn delete", title: t("chat.deleteTooltip", lang) });
+      const delBtn = actions.createEl("button", { cls: "vault-ai-message-action-btn delete", title: t("chat.deleteTooltip", lang) });
       delBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
       delBtn.addEventListener("click", () => {
         this.plugin.store.deleteMessage(index);
@@ -123,16 +123,16 @@ export class NaraMemoryView extends ItemView {
     
     // Selection and attachments (System Blocks)
     if (this.selectedText) {
-      const selection = history.createDiv({ cls: "nara-system-block" });
-      const selHeader = selection.createDiv({ cls: "nara-system-header" });
+      const selection = history.createDiv({ cls: "vault-ai-system-block" });
+      const selHeader = selection.createDiv({ cls: "vault-ai-system-header" });
       selHeader.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> <span>${t("selection.added", lang)}</span>`;
       selection.createEl("p", { text: this.selectedText.slice(0, 100) + (this.selectedText.length > 100 ? "…" : "") });
       const remove = selection.createEl("button", { text: t("selection.remove", lang) });
       remove.addEventListener("click", () => { this.selectedText = ""; this.render(); });
     }
     if (this.attachedPaths.length) {
-      const attachments = history.createDiv({ cls: "nara-system-block" });
-      const attHeader = attachments.createDiv({ cls: "nara-system-header" });
+      const attachments = history.createDiv({ cls: "vault-ai-system-block" });
+      const attHeader = attachments.createDiv({ cls: "vault-ai-system-header" });
       attHeader.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> <span>${this.attachedPaths.length} ${t("attachments.filesAttached", lang)}</span>`;
       for (const path of this.attachedPaths) {
         attachments.createEl("p", { text: path });
@@ -142,7 +142,7 @@ export class NaraMemoryView extends ItemView {
     }
 
     // Input Container
-    const inputContainer = root.createDiv({ cls: "nara-input-container" });
+    const inputContainer = root.createDiv({ cls: "vault-ai-input-container" });
     const input = inputContainer.createEl("textarea", { placeholder: t("chat.placeholder", lang) });
     input.rows = 1;
     
@@ -153,11 +153,11 @@ export class NaraMemoryView extends ItemView {
       else input.style.overflowY = 'hidden';
     });
 
-    const toolbar = inputContainer.createDiv({ cls: "nara-input-toolbar" });
+    const toolbar = inputContainer.createDiv({ cls: "vault-ai-input-toolbar" });
     const leftTools = toolbar.createDiv();
     leftTools.style.display = "flex";
     leftTools.style.gap = "8px";
-    const attachBtn = leftTools.createEl("button", { cls: "nara-attach-button", title: t("attachments.attachTooltip", lang) });
+    const attachBtn = leftTools.createEl("button", { cls: "vault-ai-attach-button", title: t("attachments.attachTooltip", lang) });
     attachBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>`;
     attachBtn.addEventListener("click", () => {
       new MarkdownFilePicker(this.plugin.app, (file) => {
@@ -165,7 +165,7 @@ export class NaraMemoryView extends ItemView {
       }).open();
     });
 
-    const modelSelector = leftTools.createDiv({ cls: "nara-model-selector", title: t("model.change", lang) });
+    const modelSelector = leftTools.createDiv({ cls: "vault-ai-model-selector", title: t("model.change", lang) });
     modelSelector.innerHTML = `<span>${this.plugin.settings.chatModel || 'Model'}</span>`;
     modelSelector.addEventListener("click", (event) => {
       const menu = new Menu();
@@ -190,11 +190,11 @@ export class NaraMemoryView extends ItemView {
     const rightTools = toolbar.createDiv();
     rightTools.style.display = "flex"; rightTools.style.gap = "8px"; rightTools.style.alignItems = "center";
 
-    const send = rightTools.createEl("button", { cls: "nara-send-button" });
+    const send = rightTools.createEl("button", { cls: "vault-ai-send-button" });
     send.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>`;
 
-    const loadingIndicator = rightTools.createDiv({ cls: "nara-loading" });
-    loadingIndicator.innerHTML = `<div class="nara-dot-flashing"></div>`;
+    const loadingIndicator = rightTools.createDiv({ cls: "vault-ai-loading" });
+    loadingIndicator.innerHTML = `<div class="vault-ai-dot-flashing"></div>`;
     loadingIndicator.style.display = "none";
 
     if (this.isThinking) {
@@ -250,7 +250,7 @@ class MarkdownFilePicker extends FuzzySuggestModal<TFile> {
   onChooseItem(file: TFile): void { this.onPick(file); }
 }
 
-export async function showAnalysis(plugin: NaraMemoryPlugin): Promise<void> {
+export async function showAnalysis(plugin: VaultAiMemoryPlugin): Promise<void> {
   const file = plugin.app.workspace.getActiveFile();
   if (!file || file.extension !== "md") { new Notice("یک فایل Markdown فعال کنید."); return; }
   const view = await plugin.activateMemoryView();
