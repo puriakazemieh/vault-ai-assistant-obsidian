@@ -28,7 +28,10 @@ jobs:
         run: npm run build
 
       - name: Verify release version
-        run: test "$(node -p \"require('./manifest.json').version\")" = "$GITHUB_REF_NAME"
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node -e "const version = require('./manifest.json').version; if (version !== process.env.RELEASE_TAG) { console.error('Manifest version ' + version + ' does not match tag ' + process.env.RELEASE_TAG); process.exit(1); }"
 
       - name: Create GitHub release
         env:
