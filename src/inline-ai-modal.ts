@@ -86,25 +86,11 @@ export class InlineAiModal extends Modal {
     this.abortController = new AbortController();
     
     try {
-        if (this.plugin.settings.enableStreaming) {
-            await this.plugin.client.chatStream(systemPrompt, userPrompt, (chunk) => {
-                if (!hasStartedReplacing) {
-                    this.editor.replaceSelection("");
-                    hasStartedReplacing = true;
-                }
-                this.editor.replaceRange(chunk, currentPos);
-                const offset = this.editor.posToOffset(currentPos);
-                currentPos = this.editor.offsetToPos(offset + chunk.length);
-            }, this.abortController.signal);
-            
-            if (!hasStartedReplacing) {
-                this.editor.replaceSelection("");
-            }
-        } else {
-            const answer = await this.plugin.client.chat(systemPrompt, userPrompt, this.abortController.signal);
-            this.editor.replaceSelection(answer);
-            hasStartedReplacing = true;
-        }
+        const answer = await this.plugin.client.chat(systemPrompt, userPrompt, this.abortController.signal);
+        
+        this.editor.replaceSelection(answer);
+        hasStartedReplacing = true;
+        
         this.close();
     } catch (error) {
         if (error instanceof Error && error.message.includes("AbortError")) {
