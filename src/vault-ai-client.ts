@@ -85,7 +85,11 @@ export class VaultAiClient {
               reject(new Error(t("api.error.invalidResponse", settings.language)));
               return;
             }
-            resolve(data.choices[0].message.content || "");
+            let content = data.choices[0].message.content;
+            if (typeof content === "object" && content !== null) {
+              content = content.text || content.content || JSON.stringify(content);
+            }
+            resolve(typeof content === "string" ? content : String(content || ""));
           } catch (error) {
             reject(new Error(`Failed to parse response: ${message(error)}`));
           }
@@ -160,7 +164,12 @@ export class VaultAiClient {
             try {
               const data = JSON.parse(dataStr);
               if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
-                const textChunk = data.choices[0].delta.content;
+                let textChunk = data.choices[0].delta.content;
+                if (typeof textChunk === "object" && textChunk !== null) {
+                   textChunk = textChunk.text || textChunk.content || JSON.stringify(textChunk);
+                }
+                textChunk = typeof textChunk === "string" ? textChunk : String(textChunk || "");
+                
                 fullContent += textChunk;
                 onChunk(textChunk);
               }
