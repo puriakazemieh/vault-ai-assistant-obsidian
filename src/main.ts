@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS, type VaultAiMemorySettings } from "./types";
 import { VaultAiMemoryView, showAnalysis, VIEW_TYPE_VAULT_AI_MEMORY } from "./view";
 import { t } from "./i18n";
 import { startComparisonFlow } from "./compare-files";
+import { InlineAiModal } from "./inline-ai-modal";
 
 export default class VaultAiMemoryPlugin extends Plugin {
   settings: VaultAiMemorySettings = structuredClone(DEFAULT_SETTINGS);
@@ -34,6 +35,19 @@ export default class VaultAiMemoryPlugin extends Plugin {
       name: t("main.command.sendSelection", this.settings.language),
       editorCallback: (editor: Editor) => { void this.chatWithSelectedText(editor.getSelection()); } 
     });
+
+    this.addCommand({ 
+      id: "ai-inline-prompt", 
+      name: t("main.command.inlinePrompt", this.settings.language),
+      editorCallback: (editor: Editor) => { 
+        const selection = editor.getSelection();
+        if (!selection.trim()) {
+           new Notice(t("main.command.sendSelection.error", this.settings.language));
+           return;
+        }
+        new InlineAiModal(this.app, this, editor, selection).open(); 
+      } 
+    });
     
     this.addCommand({
       id: "compare-two-files",
@@ -52,6 +66,11 @@ export default class VaultAiMemoryPlugin extends Plugin {
     
     this.registerEvent(this.app.workspace.on("editor-menu", (menu, editor) => {
       if (!editor.getSelection().trim()) return;
+      
+      menu.addItem((item) => item.setTitle(t("main.command.inlinePrompt", this.settings.language)).setIcon("wand-2").onClick(() => {
+        new InlineAiModal(this.app, this, editor, editor.getSelection()).open();
+      }));
+      
       menu.addItem((item) => item.setTitle(t("main.command.sendSelection", this.settings.language)).setIcon("brain-circuit").onClick(() => { void this.chatWithSelectedText(editor.getSelection()); }));
     }));
   }

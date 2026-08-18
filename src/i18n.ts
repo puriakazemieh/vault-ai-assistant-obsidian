@@ -65,10 +65,16 @@ export const translations = {
 
     // main.ts
     "main.rebuild.start": "AI Vault Memory: Index rebuild started...",
-    "main.command.sendSelection": "Send selection to chat",
+    "main.command.sendSelection": "Send selection to AI chat",
     "main.command.sendSelection.error": "Please select some text first.",
     "main.command.analyze": "Analyze current file",
     "main.command.analyze.error": "No active file.",
+    "main.command.inlinePrompt": "Apply AI on selection",
+    
+    // inline modal
+    "inline.modal.title": "Prompt for AI",
+    "inline.modal.placeholder": "e.g., Summarize this text...",
+    "inline.modal.submit": "Run",
 
     // vault-ai-client.ts
     "api.error.baseUrl": "Please enter API Base URL in settings.",
@@ -148,10 +154,16 @@ export const translations = {
 
     // main.ts
     "main.rebuild.start": "AI Vault Memory: بازسازی ایندکس شروع شد…",
-    "main.command.sendSelection": "ارسال بخش انتخاب‌شده به چت",
+    "main.command.sendSelection": "ارسال بخش انتخاب‌شده به چت هوش مصنوعی",
     "main.command.sendSelection.error": "ابتدا بخشی از متن را انتخاب کنید.",
     "main.command.analyze": "تحلیل این یادداشت (Analyze)",
     "main.command.analyze.error": "فایل فعالی وجود ندارد.",
+    "main.command.inlinePrompt": "اعمال هوش مصنوعی روی متن انتخاب‌شده",
+
+    // inline modal
+    "inline.modal.title": "دستور برای هوش مصنوعی",
+    "inline.modal.placeholder": "مثلاً: این متن را خلاصه کن...",
+    "inline.modal.submit": "اجرا",
 
     // vault-ai-client.ts
     "api.error.baseUrl": "API Base URL را در تنظیمات وارد کنید.",
