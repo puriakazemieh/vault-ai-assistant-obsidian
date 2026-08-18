@@ -242,7 +242,8 @@ export class VaultAiMemoryView extends ItemView {
     this.isThinking = true;
     this.render();
     try {
-      const answer = await this.ask(question);
+      let answer = await this.ask(question);
+      answer = await this.executeAutoActions(answer);
       this.plugin.store.addChatMessage({ role: "assistant", content: answer, createdAt: Date.now() });
       this.attachedPaths = [];
       this.selectedText = "";
@@ -254,6 +255,41 @@ export class VaultAiMemoryView extends ItemView {
     }
   }
 
+  private async executeAutoActions(content: string): Promise<string> {
+    const regex = /```file-create\nFilename:\s*(.+?)\n([\s\S]*?)```/g;
+    let modifiedContent = content;
+    const matches = [...content.matchAll(regex)];
+    
+    for (const match of matches) {
+      const fullMatch = match[0];
+      const filename = match[1].trim();
+      const fileContent = match[2].trim();
+      
+      try {
+        let finalPath = filename;
+        if (!finalPath.endsWith('.md')) {
+            finalPath += '.md';
+        }
+        
+        const existing = this.plugin.app.vault.getAbstractFileByPath(finalPath);
+        if (existing instanceof TFile) {
+            await this.plugin.app.vault.modify(existing, fileContent);
+            new Notice(`فایل بروزرسانی شد: ${finalPath}`);
+            modifiedContent = modifiedContent.replace(fullMatch, `> [!success] فایل بروزرسانی شد: [[${finalPath}]]`);
+        } else {
+            await this.plugin.app.vault.create(finalPath, fileContent);
+            new Notice(`فایل ایجاد شد: ${finalPath}`);
+            modifiedContent = modifiedContent.replace(fullMatch, `> [!success] فایل ایجاد شد: [[${finalPath}]]`);
+        }
+      } catch (err) {
+        new Notice(`خطا در عملیات فایل ${filename}: ${errorMessage(err)}`);
+        modifiedContent = modifiedContent.replace(fullMatch, `> [!error] خطا در عملیات فایل: ${filename}\n> ${errorMessage(err)}`);
+      }
+    }
+    
+    return modifiedContent;
+  }
+
   private async ask(question: string): Promise<string> {
     const attached = await Promise.all(this.attachedPaths.map(async (path) => {
       const file = this.plugin.app.vault.getAbstractFileByPath(path);
@@ -262,7 +298,8 @@ export class VaultAiMemoryView extends ItemView {
     const retrieved = await this.plugin.store.search(question, this.plugin.settings.resultCount);
     const memory = retrieved.map((item) => `MEMORY [[${item.filePath}]]${item.heading ? ` — ${item.heading}` : ""}\n${item.text}`).join("\n\n");
     const history = this.plugin.store.getChatMessages().slice(-12).map((message) => `${message.role.toUpperCase()}: ${message.content}`).join("\n");
-    return this.plugin.client.chat(this.plugin.settings.systemPrompt,
+    const autoFilePrompt = `\n\nIf the user asks you to create a new file or save your response to a file, output a markdown code block with the language 'file-create'. The first line must be exactly 'Filename: <name>.md', and the rest is the content. Example:\n\`\`\`file-create\nFilename: example.md\nContent goes here...\n\`\`\``;
+    return this.plugin.client.chat(this.plugin.settings.systemPrompt + autoFilePrompt,
       `CONVERSATION:\n${history}\n\nQUESTION:\n${question}\n\nSELECTED TEXT:\n${this.selectedText.slice(0, 12000) || "None"}\n\n${attached.filter(Boolean).join("\n\n")}\n\nRETRIEVED LOCAL MEMORY:\n${memory || "None"}`);
   }
 }
