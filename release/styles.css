@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
 /* Header */
@@ -145,6 +146,40 @@
 }
 .vault-ai-message-action-btn.delete:hover {
   color: var(--text-error);
+}
+
+/* Scroll Button */
+.vault-ai-scroll-bottom-btn {
+  position: absolute;
+  bottom: 80px;
+  right: 24px;
+  background-color: var(--background-modifier-border);
+  border: 1px solid var(--background-modifier-border-focus);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-normal);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, background-color 0.2s, transform 0.2s;
+  z-index: 10;
+  transform: translateY(10px);
+}
+.vault-ai-scroll-bottom-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.vault-ai-scroll-bottom-btn.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.vault-ai-scroll-bottom-btn:hover {
+  background-color: var(--background-modifier-hover);
 }
 
 /* System/Execution Block */

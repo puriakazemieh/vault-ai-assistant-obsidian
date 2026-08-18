@@ -10,6 +10,9 @@ export class VaultAiMemoryView extends ItemView {
   private attachedPaths: string[] = [];
   private selectedText = "";
   private isThinking = false;
+  private historyEl: HTMLElement | null = null;
+  private shouldAutoScroll = true;
+  private prevScrollTop = 0;
 
   constructor(leaf: WorkspaceLeaf, private readonly plugin: VaultAiMemoryPlugin) {
     super(leaf);
@@ -28,6 +31,7 @@ export class VaultAiMemoryView extends ItemView {
   reRender(): void { this.render(); }
 
   private render(): void {
+    this.prevScrollTop = this.historyEl ? this.historyEl.scrollTop : 0;
     const root = this.contentEl;
     root.empty();
     root.addClass("vault-ai-memory-view");
@@ -104,6 +108,8 @@ export class VaultAiMemoryView extends ItemView {
   private renderChat(root: HTMLElement): void {
     const lang = this.plugin.settings.language;
     const history = root.createDiv({ cls: "vault-ai-memory-chat-history" });
+    this.historyEl = history;
+    
     const messages = this.plugin.store.getChatMessages();
     if (messages.length === 0) history.createEl("p", { text: t("chat.emptyPlaceholder", lang), cls: "vault-ai-memory-message" });
 
@@ -127,6 +133,38 @@ export class VaultAiMemoryView extends ItemView {
     this.renderSelectedText(history, lang);
     this.renderAttachments(history, lang);
     this.renderComposer(root, lang);
+
+    const scrollBtn = root.createEl("button", { cls: "vault-ai-scroll-bottom-btn" });
+    setIcon(scrollBtn, "arrow-down");
+    scrollBtn.addEventListener("click", () => {
+      this.shouldAutoScroll = true;
+      history.scrollTo({ top: history.scrollHeight, behavior: "smooth" });
+    });
+
+    history.addEventListener("scroll", () => {
+      const atBottom = history.scrollHeight - history.scrollTop - history.clientHeight < 100;
+      this.shouldAutoScroll = atBottom;
+      if (!atBottom) {
+        scrollBtn.addClass("is-visible");
+      } else {
+        scrollBtn.removeClass("is-visible");
+      }
+    });
+
+    const observer = new MutationObserver(() => {
+      if (this.shouldAutoScroll) {
+        history.scrollTo({ top: history.scrollHeight, behavior: "auto" });
+      }
+    });
+    observer.observe(history, { childList: true, subtree: true, characterData: true });
+
+    setTimeout(() => {
+      if (this.shouldAutoScroll) {
+        history.scrollTo({ top: history.scrollHeight, behavior: "auto" });
+      } else {
+        history.scrollTo({ top: this.prevScrollTop, behavior: "auto" });
+      }
+    }, 50);
   }
 
   private async copyMessage(content: string): Promise<void> {
@@ -240,6 +278,7 @@ export class VaultAiMemoryView extends ItemView {
       : question;
     this.plugin.store.addChatMessage({ role: "user", content: display, createdAt: Date.now() });
     this.isThinking = true;
+    this.shouldAutoScroll = true;
     this.render();
     try {
       let answer = await this.ask(question);
@@ -251,6 +290,7 @@ export class VaultAiMemoryView extends ItemView {
       new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
     } finally {
       this.isThinking = false;
+      this.shouldAutoScroll = true;
       this.render();
     }
   }
