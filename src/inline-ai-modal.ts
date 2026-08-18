@@ -76,8 +76,8 @@ export class InlineAiModal extends Modal {
         errorEl.innerText = "";
     }
     
-    const systemPrompt = this.plugin.settings.systemPrompt || "You are an AI assistant.";
-    const userPrompt = `Please act as an editor. I will give you a text and an instruction. You must output ONLY the modified text without any explanations.\n\nQUESTION:\n${this.instruction}\n\nSELECTED TEXT:\n${this.selection}`;
+    const systemPrompt = this.plugin.settings.systemPrompt || "";
+    const userPrompt = `CONVERSATION:\n\n\nQUESTION:\n${this.instruction} (Act as an editor. Output ONLY the final modified text without any explanations)\n\nSELECTED TEXT:\n${this.selection.slice(0, 12000) || "None"}\n\n\n\nRETRIEVED LOCAL MEMORY:\nNone`;
     
     const cursorStart = this.editor.getCursor("from");
     let currentPos = cursorStart;
