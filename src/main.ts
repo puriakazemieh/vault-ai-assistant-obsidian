@@ -5,6 +5,7 @@ import { VaultAiMemorySettingsTab } from "./settings";
 import { DEFAULT_SETTINGS, type VaultAiMemorySettings } from "./types";
 import { VaultAiMemoryView, showAnalysis, VIEW_TYPE_VAULT_AI_MEMORY } from "./view";
 import { t } from "./i18n";
+import { startComparisonFlow } from "./compare-files";
 
 export default class VaultAiMemoryPlugin extends Plugin {
   settings: VaultAiMemorySettings = structuredClone(DEFAULT_SETTINGS);
@@ -32,6 +33,12 @@ export default class VaultAiMemoryPlugin extends Plugin {
       id: "send-selection-to-chat", 
       name: t("main.command.sendSelection", this.settings.language),
       editorCallback: (editor: Editor) => { void this.chatWithSelectedText(editor.getSelection()); } 
+    });
+    
+    this.addCommand({
+      id: "compare-two-files",
+      name: t("compare.command", this.settings.language),
+      callback: () => { startComparisonFlow(this); }
     });
     
     this.addCommand({ id: "forget-current-file", name: "Forget current file from memory", callback: () => { this.forgetActiveFile(); } });

@@ -1,5 +1,6 @@
 import { App, FuzzySuggestModal, ItemView, MarkdownRenderer, Menu, Notice, setIcon, TFile, WorkspaceLeaf } from "obsidian";
 import { ConfirmModal } from "./confirm-modal";
+import { MarkdownFilePicker } from "./file-picker";
 import { t } from "./i18n";
 import type VaultAiMemoryPlugin from "./main";
 
@@ -175,7 +176,7 @@ export class VaultAiMemoryView extends ItemView {
     const attachButton = leftTools.createEl("button", { cls: "vault-ai-attach-button", title: t("attachments.attachTooltip", lang) });
     setIcon(attachButton, "paperclip");
     attachButton.addEventListener("click", () => {
-      new MarkdownFilePicker(this.plugin.app, (file) => {
+      new MarkdownFilePicker(this.plugin.app, t("filePicker.placeholder", lang), (file) => {
         if (this.attachedPaths.includes(file.path)) return;
         this.attachedPaths.push(file.path);
         this.render();
@@ -266,15 +267,6 @@ export class VaultAiMemoryView extends ItemView {
   }
 }
 
-class MarkdownFilePicker extends FuzzySuggestModal<TFile> {
-  constructor(app: App, private readonly onPick: (file: TFile) => void) {
-    super(app);
-    this.setPlaceholder("یک فایل Markdown انتخاب کنید…");
-  }
-  getItems(): TFile[] { return this.app.vault.getMarkdownFiles(); }
-  getItemText(file: TFile): string { return file.path; }
-  onChooseItem(file: TFile): void { this.onPick(file); }
-}
 
 export async function showAnalysis(plugin: VaultAiMemoryPlugin): Promise<void> {
   const file = plugin.app.workspace.getActiveFile();

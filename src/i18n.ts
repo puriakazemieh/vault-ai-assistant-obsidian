@@ -73,7 +73,16 @@ export const translations = {
     // vault-ai-client.ts
     "api.error.baseUrl": "Please enter API Base URL in settings.",
     "api.error.apiKey": "Please enter API Key in settings.",
-    "api.error.invalidResponse": "Invalid chat response."
+    "api.error.invalidResponse": "Invalid chat response.",
+    
+    // compare-files.ts
+    "compare.command": "Compare two files",
+    "compare.pickFirst": "Select the first file to compare...",
+    "compare.pickSecond": "Select the second file to compare...",
+    "compare.processing": "Comparing files...",
+    "compare.success": "Comparison complete. File saved.",
+    "compare.error": "Comparison failed:",
+    "compare.defaultPrompt": "Compare the following two documents and write a summary of their similarities and differences:"
   },
   fa: {
     // view.ts
@@ -147,7 +156,16 @@ export const translations = {
     // vault-ai-client.ts
     "api.error.baseUrl": "API Base URL را در تنظیمات وارد کنید.",
     "api.error.apiKey": "API key را در تنظیمات وارد کنید.",
-    "api.error.invalidResponse": "پاسخ chat نامعتبر است."
+    "api.error.invalidResponse": "پاسخ chat نامعتبر است.",
+
+    // compare-files.ts
+    "compare.command": "مقایسه دو فایل",
+    "compare.pickFirst": "فایل اول برای مقایسه را انتخاب کنید...",
+    "compare.pickSecond": "فایل دوم برای مقایسه را انتخاب کنید...",
+    "compare.processing": "در حال مقایسه فایل‌ها...",
+    "compare.success": "مقایسه انجام شد. فایل جدید ذخیره شد.",
+    "compare.error": "خطا در مقایسه:",
+    "compare.defaultPrompt": "دو متن زیر را با هم مقایسه کن و خلاصه‌ای از شباهت‌ها و تفاوت‌های آنها بنویس:"
   }
 };
 
