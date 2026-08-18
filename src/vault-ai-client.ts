@@ -1,4 +1,6 @@
 import { requestUrl } from "obsidian";
+import * as https from "https";
+import { URL } from "url";
 import type { VaultAiMemorySettings, VaultAiModel } from "./types";
 import { t } from "./i18n";
 
@@ -72,13 +74,63 @@ export class VaultAiClient {
     const settings = this.getSettings();
     if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     
-    const response = await fetch(this.endpoint("/chat/completions"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${settings.apiKey.trim()}`
-      },
-      body: JSON.stringify({
+    return new Promise((resolve, reject) => {
+      const url = new URL(this.endpoint("/chat/completions"));
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${settings.apiKey.trim()}`
+        }
+      };
+
+      const req = https.request(url, options, (res) => {
+        if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+          let errorBody = "";
+          res.on("data", (chunk) => { errorBody += chunk.toString(); });
+          res.on("end", () => {
+             reject(new Error(`API request (${res.statusCode}): ${errorBody || "request failed"}`));
+          });
+          return;
+        }
+
+        let fullContent = "";
+        let buffer = "";
+
+        res.on("data", (chunk: Buffer) => {
+          buffer += chunk.toString("utf-8");
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+          
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data: ")) continue;
+            const dataStr = trimmed.slice(6);
+            if (dataStr === "[DONE]") continue;
+            
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
+                const textChunk = data.choices[0].delta.content;
+                fullContent += textChunk;
+                onChunk(textChunk);
+              }
+            } catch (e) {
+                // Ignore incomplete chunks
+            }
+          }
+        });
+
+        res.on("end", () => {
+          resolve(fullContent);
+        });
+      });
+
+      req.on("error", (err) => {
+        reject(new Error(`Request failed: ${err.message}`));
+      });
+
+      req.write(JSON.stringify({
         model: settings.chatModel,
         temperature: 0.2,
         stream: true,
@@ -86,51 +138,9 @@ export class VaultAiClient {
           { role: "system", content: system },
           { role: "user", content: user }
         ]
-      })
+      }));
+      req.end();
     });
-
-    if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`API request (${response.status}): ${text || "request failed"}`);
-    }
-
-    if (!response.body) {
-        throw new Error("No response body returned from stream.");
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let fullContent = "";
-    let buffer = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-      
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith("data: ")) continue;
-        const dataStr = trimmed.slice(6);
-        if (dataStr === "[DONE]") continue;
-        
-        try {
-          const data = JSON.parse(dataStr);
-          if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
-            const chunk = data.choices[0].delta.content;
-            fullContent += chunk;
-            onChunk(chunk);
-          }
-        } catch (e) {
-            // Ignore incomplete chunks
-        }
-      }
-    }
-    
-    return fullContent;
   }
 }
 

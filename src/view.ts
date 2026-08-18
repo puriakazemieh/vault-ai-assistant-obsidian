@@ -107,7 +107,8 @@ export class VaultAiMemoryView extends ItemView {
 
   private renderChat(root: HTMLElement): void {
     const lang = this.plugin.settings.language;
-    const history = root.createDiv({ cls: "vault-ai-memory-chat-history" });
+    const historyWrapper = root.createDiv({ cls: "vault-ai-history-wrapper" });
+    const history = historyWrapper.createDiv({ cls: "vault-ai-memory-chat-history" });
     this.historyEl = history;
     
     const messages = this.plugin.store.getChatMessages();
@@ -128,14 +129,28 @@ export class VaultAiMemoryView extends ItemView {
         this.plugin.store.deleteMessage(index);
         this.render();
       });
+
+      if (message.role === "assistant" && message.content.includes("**Error:**") && index === messages.length - 1) {
+        const retryButton = actions.createEl("button", { cls: "vault-ai-message-action-btn", title: lang === "fa" ? "تلاش مجدد" : "Retry" });
+        setIcon(retryButton, "refresh-cw");
+        retryButton.addEventListener("click", () => {
+           this.plugin.store.deleteMessage(index);
+           const prevMsg = this.plugin.store.getChatMessages()[index - 1];
+           if (prevMsg && prevMsg.role === "user") {
+              this.plugin.store.deleteMessage(index - 1);
+              const rawQuestion = prevMsg.content.split("\n\nفایل‌های پیوست:")[0].split("\n\nAttached files:")[0];
+              void this.submitQuestion(rawQuestion);
+           }
+        });
+      }
     });
 
     this.renderSelectedText(history, lang);
     this.renderAttachments(history, lang);
     this.renderComposer(root, lang);
 
-    const scrollBtn = root.createEl("button", { cls: "vault-ai-scroll-bottom-btn" });
-    setIcon(scrollBtn, "arrow-down");
+    const scrollBtn = historyWrapper.createEl("button", { cls: "vault-ai-scroll-bottom-btn" });
+    setIcon(scrollBtn, "chevron-down");
     scrollBtn.addEventListener("click", () => {
       this.shouldAutoScroll = true;
       history.scrollTo({ top: history.scrollHeight, behavior: "smooth" });

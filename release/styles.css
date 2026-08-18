@@ -61,14 +61,22 @@
 }
 
 /* Chat History */
+.vault-ai-history-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
 .vault-ai-memory-chat-history {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   gap: 24px;
   overflow-y: auto;
-  margin-bottom: 16px;
   padding-right: 8px;
+  margin-bottom: 0;
 }
 
 /* Messages */
@@ -151,8 +159,8 @@
 /* Scroll Button */
 .vault-ai-scroll-bottom-btn {
   position: absolute;
-  bottom: 80px;
-  right: 24px;
+  bottom: 16px;
+  right: 16px;
   background-color: var(--background-modifier-border);
   border: 1px solid var(--background-modifier-border-focus);
   border-radius: 50%;
@@ -170,8 +178,8 @@
   transform: translateY(10px);
 }
 .vault-ai-scroll-bottom-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 .vault-ai-scroll-bottom-btn.is-visible {
   opacity: 1;
