@@ -161,11 +161,12 @@
   position: absolute;
   bottom: 16px;
   right: 16px;
-  background-color: var(--background-modifier-border);
+  background-color: var(--interactive-accent);
   border: 1px solid var(--background-modifier-border-focus);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,8 +179,9 @@
   transform: translateY(10px);
 }
 .vault-ai-scroll-bottom-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  color: var(--text-on-accent);
 }
 .vault-ai-scroll-bottom-btn.is-visible {
   opacity: 1;

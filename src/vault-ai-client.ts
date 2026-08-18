@@ -56,21 +56,64 @@ export class VaultAiClient {
     });
   }
 
-  async chat(system: string, user: string): Promise<string> {
-    const data = await this.post("/chat/completions", {
-      model: this.getSettings().chatModel,
-      temperature: 0.2,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user }
-      ]
+  async chat(system: string, user: string, signal?: AbortSignal): Promise<string> {
+    const settings = this.getSettings();
+    if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
+    
+    return new Promise((resolve, reject) => {
+      const url = new URL(this.endpoint("/chat/completions"));
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${settings.apiKey.trim()}`
+        }
+      };
+
+      const req = https.request(url, options, (res) => {
+        let body = "";
+        res.on("data", (chunk) => body += chunk);
+        res.on("end", () => {
+          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+            reject(new Error(`API request (${res.statusCode}): ${body || "request failed"}`));
+            return;
+          }
+          try {
+            const data = JSON.parse(body);
+            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+              reject(new Error(t("api.error.invalidResponse", settings.language)));
+              return;
+            }
+            resolve(data.choices[0].message.content || "");
+          } catch (error) {
+            reject(new Error(`Failed to parse response: ${message(error)}`));
+          }
+        });
+      });
+
+      req.on("error", (err) => {
+        reject(new Error(`Request failed: ${err.message}`));
+      });
+      
+      if (signal) {
+        signal.addEventListener("abort", () => {
+          req.destroy(new Error("AbortError"));
+        });
+      }
+
+      req.write(JSON.stringify({
+        model: settings.chatModel,
+        temperature: 0.2,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user }
+        ]
+      }));
+      req.end();
     });
-    const content = chatContent(data);
-    if (!content) throw new Error(t("api.error.invalidResponse", this.getSettings().language));
-    return content;
   }
 
-  async chatStream(system: string, user: string, onChunk: (chunk: string) => void): Promise<string> {
+  async chatStream(system: string, user: string, onChunk: (chunk: string) => void, signal?: AbortSignal): Promise<string> {
     const settings = this.getSettings();
     if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     
@@ -129,6 +172,12 @@ export class VaultAiClient {
       req.on("error", (err) => {
         reject(new Error(`Request failed: ${err.message}`));
       });
+      
+      if (signal) {
+        signal.addEventListener("abort", () => {
+          req.destroy(new Error("AbortError"));
+        });
+      }
 
       req.write(JSON.stringify({
         model: settings.chatModel,
@@ -162,3 +211,5 @@ function chatContent(value: unknown): string | null {
   if (!isRecord(firstChoice) || !isRecord(firstChoice.message)) return null;
   return typeof firstChoice.message.content === "string" ? firstChoice.message.content : null;
 }
+
+function message(error: unknown): string { return error instanceof Error ? error.message : String(error); }

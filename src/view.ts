@@ -10,6 +10,7 @@ export class VaultAiMemoryView extends ItemView {
   private attachedPaths: string[] = [];
   private selectedText = "";
   private isThinking = false;
+  private currentAbortController: AbortController | null = null;
   private historyEl: HTMLElement | null = null;
   private shouldAutoScroll = true;
   private prevScrollTop = 0;
@@ -253,9 +254,20 @@ export class VaultAiMemoryView extends ItemView {
     const rightTools = toolbar.createDiv({ cls: "vault-ai-tool-group vault-ai-tool-group--right" });
     const send = rightTools.createEl("button", { cls: "vault-ai-send-button", title: "Send" });
     setIcon(send, "arrow-up");
+    
+    const cancelBtn = rightTools.createEl("button", { cls: "vault-ai-cancel-button", title: "لغو" });
+    setIcon(cancelBtn, "square");
+    cancelBtn.addEventListener("click", () => {
+       if (this.currentAbortController) {
+           this.currentAbortController.abort();
+       }
+    });
+
     const loadingIndicator = rightTools.createDiv({ cls: "vault-ai-loading" });
     loadingIndicator.createDiv({ cls: "vault-ai-dot-flashing" });
+    
     send.toggleClass("vault-ai-hidden", this.isThinking);
+    cancelBtn.toggleClass("vault-ai-hidden", !this.isThinking);
     loadingIndicator.toggleClass("is-visible", this.isThinking);
     input.disabled = this.isThinking;
 
@@ -305,6 +317,8 @@ export class VaultAiMemoryView extends ItemView {
     this.plugin.store.addChatMessage({ role: "user", content: display, createdAt: Date.now() });
     this.isThinking = true;
     this.shouldAutoScroll = true;
+    
+    this.currentAbortController = new AbortController();
 
     if (this.plugin.settings.enableStreaming) {
       this.plugin.store.addChatMessage({ role: "assistant", content: "...", createdAt: Date.now() });
@@ -327,7 +341,7 @@ export class VaultAiMemoryView extends ItemView {
             bubble.empty();
             void MarkdownRenderer.render(this.plugin.app, currentContent, bubble, "", this).catch(() => {});
           }
-        });
+        }, this.currentAbortController.signal);
         
         answer = await this.executeAutoActions(answer);
         
@@ -340,29 +354,43 @@ export class VaultAiMemoryView extends ItemView {
         this.attachedPaths = [];
         this.selectedText = "";
       } catch (error) {
-        new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
-        const errorMessages = this.plugin.store.getChatMessages();
-        if (errorMessages[messageIndex]) {
-          errorMessages[messageIndex].content = `**Error:** ${errorMessage(error)}`;
-          this.plugin.store.queuePersist();
+        if (error instanceof Error && error.message.includes("AbortError")) {
+           const errorMessages = this.plugin.store.getChatMessages();
+           if (errorMessages[messageIndex]) {
+             errorMessages[messageIndex].content += "\n\n*[توقف دریافت پاسخ]*";
+             this.plugin.store.queuePersist();
+           }
+        } else {
+           new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
+           const errorMessages = this.plugin.store.getChatMessages();
+           if (errorMessages[messageIndex]) {
+             errorMessages[messageIndex].content = `**Error:** ${errorMessage(error)}`;
+             this.plugin.store.queuePersist();
+           }
         }
       } finally {
         this.isThinking = false;
+        this.currentAbortController = null;
         this.shouldAutoScroll = true;
         this.render();
       }
     } else {
       this.render();
       try {
-        let answer = await this.ask(question);
+        let answer = await this.ask(question, this.currentAbortController.signal);
         answer = await this.executeAutoActions(answer);
         this.plugin.store.addChatMessage({ role: "assistant", content: answer, createdAt: Date.now() });
         this.attachedPaths = [];
         this.selectedText = "";
       } catch (error) {
-        new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
+        if (error instanceof Error && error.message.includes("AbortError")) {
+            // Ignored if cancelled during non-stream mode
+        } else {
+            new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
+        }
       } finally {
         this.isThinking = false;
+        this.currentAbortController = null;
         this.shouldAutoScroll = true;
         this.render();
       }
@@ -404,7 +432,7 @@ export class VaultAiMemoryView extends ItemView {
     return modifiedContent;
   }
 
-  private async ask(question: string): Promise<string> {
+  private async ask(question: string, signal?: AbortSignal): Promise<string> {
     const attached = await Promise.all(this.attachedPaths.map(async (path) => {
       const file = this.plugin.app.vault.getAbstractFileByPath(path);
       return file instanceof TFile ? `ATTACHED FILE: ${file.path}\n${(await this.plugin.app.vault.read(file)).slice(0, 12000)}` : "";
@@ -414,10 +442,10 @@ export class VaultAiMemoryView extends ItemView {
     const history = this.plugin.store.getChatMessages().slice(-12).map((message) => `${message.role.toUpperCase()}: ${message.content}`).join("\n");
     const autoFilePrompt = `\n\nIf the user asks you to create a new file or save your response to a file, output a markdown code block with the language 'file-create'. The first line must be exactly 'Filename: <name>.md', and the rest is the content. Example:\n\`\`\`file-create\nFilename: example.md\nContent goes here...\n\`\`\``;
     return this.plugin.client.chat(this.plugin.settings.systemPrompt + autoFilePrompt,
-      `CONVERSATION:\n${history}\n\nQUESTION:\n${question}\n\nSELECTED TEXT:\n${this.selectedText.slice(0, 12000) || "None"}\n\n${attached.filter(Boolean).join("\n\n")}\n\nRETRIEVED LOCAL MEMORY:\n${memory || "None"}`);
+      `CONVERSATION:\n${history}\n\nQUESTION:\n${question}\n\nSELECTED TEXT:\n${this.selectedText.slice(0, 12000) || "None"}\n\n${attached.filter(Boolean).join("\n\n")}\n\nRETRIEVED LOCAL MEMORY:\n${memory || "None"}`, signal);
   }
 
-  private async askStream(question: string, onChunk: (chunk: string) => void): Promise<string> {
+  private async askStream(question: string, onChunk: (chunk: string) => void, signal?: AbortSignal): Promise<string> {
     const attached = await Promise.all(this.attachedPaths.map(async (path) => {
       const file = this.plugin.app.vault.getAbstractFileByPath(path);
       return file instanceof TFile ? `ATTACHED FILE: ${file.path}\n${(await this.plugin.app.vault.read(file)).slice(0, 12000)}` : "";
@@ -428,7 +456,7 @@ export class VaultAiMemoryView extends ItemView {
     const autoFilePrompt = `\n\nIf the user asks you to create a new file or save your response to a file, output a markdown code block with the language 'file-create'. The first line must be exactly 'Filename: <name>.md', and the rest is the content. Example:\n\`\`\`file-create\nFilename: example.md\nContent goes here...\n\`\`\``;
     return this.plugin.client.chatStream(this.plugin.settings.systemPrompt + autoFilePrompt,
       `CONVERSATION:\n${history}\n\nQUESTION:\n${question}\n\nSELECTED TEXT:\n${this.selectedText.slice(0, 12000) || "None"}\n\n${attached.filter(Boolean).join("\n\n")}\n\nRETRIEVED LOCAL MEMORY:\n${memory || "None"}`,
-      onChunk);
+      onChunk, signal);
   }
 }
 

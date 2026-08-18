@@ -82,10 +82,23 @@ export class InlineAiModal extends Modal {
             const answer = await this.plugin.client.chat(systemPrompt, userPrompt);
             this.editor.replaceRange(answer, currentPos);
         }
-    } catch (error) {
-        new Notice(`AI Error: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
         this.close();
+    } catch (error) {
+        // Revert to original
+        this.editor.replaceRange(this.selection, cursorStart, currentPos);
+        
+        let errorEl = this.contentEl.querySelector(".vault-ai-error-text") as HTMLElement;
+        if (!errorEl) {
+            errorEl = this.contentEl.createEl("p", { cls: "vault-ai-error-text" });
+            errorEl.style.color = "var(--text-error)";
+            errorEl.style.marginTop = "12px";
+        }
+        errorEl.innerText = `خطا: ${error instanceof Error ? error.message : String(error)}`;
+        
+        if (this.submitButton) {
+            this.submitButton.disabled = false;
+            this.submitButton.innerText = this.plugin.settings.language === "fa" ? "تلاش مجدد" : "Retry";
+        }
     }
   }
 }
