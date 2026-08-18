@@ -67,6 +67,8 @@ export class VaultAiClient {
         timeout: 60000,
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
+          "User-Agent": "Obsidian-Vault-AI",
           "Authorization": `Bearer ${settings.apiKey.trim()}`
         }
       };
@@ -148,6 +150,8 @@ export class VaultAiClient {
         timeout: 60000,
         headers: {
           "Content-Type": "application/json",
+          "Accept": "text/event-stream",
+          "User-Agent": "Obsidian-Vault-AI",
           "Authorization": `Bearer ${settings.apiKey.trim()}`
         }
       };
