@@ -5,6 +5,7 @@ import { t } from "./i18n";
 export class InlineAiModal extends Modal {
   private instruction = "";
   private submitButton: HTMLButtonElement | null = null;
+  private abortController: AbortController | null = null;
   
   constructor(
     app: App, 
@@ -51,6 +52,9 @@ export class InlineAiModal extends Modal {
   }
 
   onClose(): void {
+    if (this.abortController) {
+        this.abortController.abort();
+    }
     this.contentEl.empty();
   }
 
@@ -68,24 +72,43 @@ export class InlineAiModal extends Modal {
     const userPrompt = `Instruction: ${this.instruction}\n\nText to modify:\n${this.selection}`;
     
     const cursorStart = this.editor.getCursor("from");
-    this.editor.replaceSelection("");
     let currentPos = cursorStart;
+    let hasStartedReplacing = false;
+    
+    this.abortController = new AbortController();
     
     try {
         if (this.plugin.settings.enableStreaming) {
             await this.plugin.client.chatStream(systemPrompt, userPrompt, (chunk) => {
+                if (!hasStartedReplacing) {
+                    this.editor.replaceSelection("");
+                    hasStartedReplacing = true;
+                }
                 this.editor.replaceRange(chunk, currentPos);
                 const offset = this.editor.posToOffset(currentPos);
                 currentPos = this.editor.offsetToPos(offset + chunk.length);
-            });
+            }, this.abortController.signal);
+            
+            if (!hasStartedReplacing) {
+                this.editor.replaceSelection("");
+            }
         } else {
-            const answer = await this.plugin.client.chat(systemPrompt, userPrompt);
-            this.editor.replaceRange(answer, currentPos);
+            const answer = await this.plugin.client.chat(systemPrompt, userPrompt, this.abortController.signal);
+            this.editor.replaceSelection(answer);
+            hasStartedReplacing = true;
         }
         this.close();
     } catch (error) {
-        // Revert to original
-        this.editor.replaceRange(this.selection, cursorStart, currentPos);
+        if (error instanceof Error && error.message.includes("AbortError")) {
+            if (hasStartedReplacing) {
+                this.editor.replaceRange(this.selection, cursorStart, currentPos);
+            }
+            return;
+        }
+        
+        if (hasStartedReplacing) {
+            this.editor.replaceRange(this.selection, cursorStart, currentPos);
+        }
         
         let errorEl = this.contentEl.querySelector(".vault-ai-error-text") as HTMLElement;
         if (!errorEl) {
@@ -97,7 +120,7 @@ export class InlineAiModal extends Modal {
         
         if (this.submitButton) {
             this.submitButton.disabled = false;
-            this.submitButton.innerText = this.plugin.settings.language === "fa" ? "تلاش مجدد" : "Retry";
+            this.submitButton.innerText = this.plugin.settings.language === "fa" ? "ارسال مجدد" : "Retry";
         }
     }
   }

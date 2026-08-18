@@ -74,7 +74,7 @@ export const translations = {
     // inline modal
     "inline.modal.title": "Prompt for AI",
     "inline.modal.placeholder": "e.g., Summarize this text...",
-    "inline.modal.submit": "Run",
+    "inline.modal.submit": "Send",
 
     // vault-ai-client.ts
     "api.error.baseUrl": "Please enter API Base URL in settings.",
@@ -163,7 +163,7 @@ export const translations = {
     // inline modal
     "inline.modal.title": "دستور برای هوش مصنوعی",
     "inline.modal.placeholder": "مثلاً: این متن را خلاصه کن...",
-    "inline.modal.submit": "اجرا",
+    "inline.modal.submit": "ارسال",
 
     // vault-ai-client.ts
     "api.error.baseUrl": "API Base URL را در تنظیمات وارد کنید.",

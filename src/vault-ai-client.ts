@@ -64,6 +64,7 @@ export class VaultAiClient {
       const url = new URL(this.endpoint("/chat/completions"));
       const options = {
         method: "POST",
+        timeout: 60000,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${settings.apiKey.trim()}`
@@ -95,6 +96,10 @@ export class VaultAiClient {
         reject(new Error(`Request failed: ${err.message}`));
       });
       
+      req.on("timeout", () => {
+        req.destroy(new Error("Request timed out"));
+      });
+      
       if (signal) {
         signal.addEventListener("abort", () => {
           req.destroy(new Error("AbortError"));
@@ -121,6 +126,7 @@ export class VaultAiClient {
       const url = new URL(this.endpoint("/chat/completions"));
       const options = {
         method: "POST",
+        timeout: 60000,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${settings.apiKey.trim()}`
@@ -171,6 +177,10 @@ export class VaultAiClient {
 
       req.on("error", (err) => {
         reject(new Error(`Request failed: ${err.message}`));
+      });
+      
+      req.on("timeout", () => {
+        req.destroy(new Error("Request timed out"));
       });
       
       if (signal) {
