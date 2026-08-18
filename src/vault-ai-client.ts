@@ -71,10 +71,23 @@ export class VaultAiClient {
         }
       };
 
+      let idleTimeout: NodeJS.Timeout;
+      const resetIdleTimeout = () => {
+          clearTimeout(idleTimeout);
+          idleTimeout = setTimeout(() => {
+              req.destroy(new Error("Request timed out: server did not respond in 60s"));
+          }, 60000);
+      };
+      resetIdleTimeout();
+
       const req = https.request(url, options, (res) => {
         let body = "";
-        res.on("data", (chunk) => body += chunk);
+        res.on("data", (chunk) => {
+            resetIdleTimeout();
+            body += chunk;
+        });
         res.on("end", () => {
+          clearTimeout(idleTimeout);
           if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
             reject(new Error(`API request (${res.statusCode}): ${body || "request failed"}`));
             return;
@@ -97,6 +110,7 @@ export class VaultAiClient {
       });
 
       req.on("error", (err) => {
+        clearTimeout(idleTimeout);
         reject(new Error(`Request failed: ${err.message}`));
       });
       
@@ -106,6 +120,7 @@ export class VaultAiClient {
       
       if (signal) {
         signal.addEventListener("abort", () => {
+          clearTimeout(idleTimeout);
           req.destroy(new Error("AbortError"));
         });
       }
@@ -137,11 +152,24 @@ export class VaultAiClient {
         }
       };
 
+      let idleTimeout: NodeJS.Timeout;
+      const resetIdleTimeout = () => {
+          clearTimeout(idleTimeout);
+          idleTimeout = setTimeout(() => {
+              req.destroy(new Error("Stream idle timeout: no data received for 30s"));
+          }, 30000);
+      };
+      resetIdleTimeout();
+
       const req = https.request(url, options, (res) => {
         if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
           let errorBody = "";
-          res.on("data", (chunk) => { errorBody += chunk.toString(); });
+          res.on("data", (chunk) => { 
+              resetIdleTimeout();
+              errorBody += chunk.toString(); 
+          });
           res.on("end", () => {
+             clearTimeout(idleTimeout);
              reject(new Error(`API request (${res.statusCode}): ${errorBody || "request failed"}`));
           });
           return;
@@ -151,6 +179,7 @@ export class VaultAiClient {
         let buffer = "";
 
         res.on("data", (chunk: Buffer) => {
+          resetIdleTimeout();
           buffer += chunk.toString("utf-8");
           const lines = buffer.split("\n");
           buffer = lines.pop() || "";
@@ -180,11 +209,13 @@ export class VaultAiClient {
         });
 
         res.on("end", () => {
+          clearTimeout(idleTimeout);
           resolve(fullContent);
         });
       });
 
       req.on("error", (err) => {
+        clearTimeout(idleTimeout);
         reject(new Error(`Request failed: ${err.message}`));
       });
       
@@ -194,6 +225,7 @@ export class VaultAiClient {
       
       if (signal) {
         signal.addEventListener("abort", () => {
+          clearTimeout(idleTimeout);
           req.destroy(new Error("AbortError"));
         });
       }

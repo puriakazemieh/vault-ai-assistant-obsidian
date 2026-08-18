@@ -62,6 +62,9 @@ export class InlineAiModal extends Modal {
     if (!this.instruction.trim()) {
         return;
     }
+    if (this.submitButton && this.submitButton.disabled) {
+        return;
+    }
     
     if (this.submitButton) {
         this.submitButton.disabled = true;
