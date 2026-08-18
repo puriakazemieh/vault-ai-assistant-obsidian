@@ -65,13 +65,14 @@ export default class VaultAiMemoryPlugin extends Plugin {
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => { this.store.removeFile(oldPath); if (this.settings.autoIndex && file instanceof TFile) void this.indexFileQuietly(file); }));
     
     this.registerEvent(this.app.workspace.on("editor-menu", (menu, editor) => {
-      if (!editor.getSelection().trim()) return;
+      const selection = editor.getSelection();
+      if (!selection.trim()) return;
       
       menu.addItem((item) => item.setTitle(t("main.command.inlinePrompt", this.settings.language)).setIcon("wand-2").onClick(() => {
-        new InlineAiModal(this.app, this, editor, editor.getSelection()).open();
+        new InlineAiModal(this.app, this, editor, selection).open();
       }));
       
-      menu.addItem((item) => item.setTitle(t("main.command.sendSelection", this.settings.language)).setIcon("brain-circuit").onClick(() => { void this.chatWithSelectedText(editor.getSelection()); }));
+      menu.addItem((item) => item.setTitle(t("main.command.sendSelection", this.settings.language)).setIcon("brain-circuit").onClick(() => { void this.chatWithSelectedText(selection); }));
     }));
   }
 

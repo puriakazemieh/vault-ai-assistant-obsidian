@@ -4,6 +4,7 @@ import { t } from "./i18n";
 
 export class InlineAiModal extends Modal {
   private instruction = "";
+  private submitButton: HTMLButtonElement | null = null;
   
   constructor(
     app: App, 
@@ -40,6 +41,7 @@ export class InlineAiModal extends Modal {
       
     new Setting(contentEl)
       .addButton((btn) => {
+        this.submitButton = btn.buttonEl;
         btn.setButtonText(t("inline.modal.submit", lang))
            .setCta()
            .onClick(() => {
@@ -56,7 +58,11 @@ export class InlineAiModal extends Modal {
     if (!this.instruction.trim()) {
         return;
     }
-    this.close();
+    
+    if (this.submitButton) {
+        this.submitButton.disabled = true;
+        this.submitButton.innerText = this.plugin.settings.language === "fa" ? "در حال پردازش..." : "Processing...";
+    }
     
     const systemPrompt = "You are an AI editor assistant. Modify the following text according to the user's instructions. Output ONLY the modified text, do not wrap it in markdown code blocks unless the text itself is code, and do not add conversational pleasantries.";
     const userPrompt = `Instruction: ${this.instruction}\n\nText to modify:\n${this.selection}`;
@@ -78,6 +84,8 @@ export class InlineAiModal extends Modal {
         }
     } catch (error) {
         new Notice(`AI Error: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+        this.close();
     }
   }
 }
