@@ -68,8 +68,8 @@ export class InlineAiModal extends Modal {
         this.submitButton.innerText = this.plugin.settings.language === "fa" ? "در حال پردازش..." : "Processing...";
     }
     
-    const systemPrompt = "You are an AI editor assistant. Modify the following text according to the user's instructions. Output ONLY the modified text, do not wrap it in markdown code blocks unless the text itself is code, and do not add conversational pleasantries.";
-    const userPrompt = `Instruction: ${this.instruction}\n\nText to modify:\n${this.selection}`;
+    const systemPrompt = `${this.plugin.settings.systemPrompt}\n\nCRITICAL RULE: You are an AI editor assistant. Apply the user's INSTRUCTION to the SELECTED TEXT. You must output ONLY the modified text. Do NOT add any explanations, conversational pleasantries, or markdown formatting blocks (unless the text itself is code).`;
+    const userPrompt = `INSTRUCTION:\n${this.instruction}\n\nSELECTED TEXT:\n${this.selection}`;
     
     const cursorStart = this.editor.getCursor("from");
     let currentPos = cursorStart;
