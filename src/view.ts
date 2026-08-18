@@ -290,19 +290,67 @@ export class VaultAiMemoryView extends ItemView {
     this.plugin.store.addChatMessage({ role: "user", content: display, createdAt: Date.now() });
     this.isThinking = true;
     this.shouldAutoScroll = true;
-    this.render();
-    try {
-      let answer = await this.ask(question);
-      answer = await this.executeAutoActions(answer);
-      this.plugin.store.addChatMessage({ role: "assistant", content: answer, createdAt: Date.now() });
-      this.attachedPaths = [];
-      this.selectedText = "";
-    } catch (error) {
-      new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
-    } finally {
-      this.isThinking = false;
-      this.shouldAutoScroll = true;
+
+    if (this.plugin.settings.enableStreaming) {
+      this.plugin.store.addChatMessage({ role: "assistant", content: "...", createdAt: Date.now() });
+      const messages = this.plugin.store.getChatMessages();
+      const messageIndex = messages.length - 1;
       this.render();
+      
+      const bubbles = this.historyEl?.querySelectorAll('.vault-ai-memory-message--assistant .markdown-rendered');
+      const bubble = bubbles ? bubbles[bubbles.length - 1] as HTMLElement : null;
+
+      try {
+        let currentContent = "";
+        let lastRenderTime = 0;
+        
+        let answer = await this.askStream(question, (chunk) => {
+          currentContent += chunk;
+          const now = Date.now();
+          if (now - lastRenderTime > 80 && bubble) {
+            lastRenderTime = now;
+            bubble.empty();
+            void MarkdownRenderer.render(this.plugin.app, currentContent, bubble, "", this).catch(() => {});
+          }
+        });
+        
+        answer = await this.executeAutoActions(answer);
+        
+        const finalMessages = this.plugin.store.getChatMessages();
+        if (finalMessages[messageIndex]) {
+          finalMessages[messageIndex].content = answer;
+          this.plugin.store.queuePersist();
+        }
+        
+        this.attachedPaths = [];
+        this.selectedText = "";
+      } catch (error) {
+        new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
+        const errorMessages = this.plugin.store.getChatMessages();
+        if (errorMessages[messageIndex]) {
+          errorMessages[messageIndex].content = `**Error:** ${errorMessage(error)}`;
+          this.plugin.store.queuePersist();
+        }
+      } finally {
+        this.isThinking = false;
+        this.shouldAutoScroll = true;
+        this.render();
+      }
+    } else {
+      this.render();
+      try {
+        let answer = await this.ask(question);
+        answer = await this.executeAutoActions(answer);
+        this.plugin.store.addChatMessage({ role: "assistant", content: answer, createdAt: Date.now() });
+        this.attachedPaths = [];
+        this.selectedText = "";
+      } catch (error) {
+        new Notice(`گفتگو ناموفق بود: ${errorMessage(error)}`);
+      } finally {
+        this.isThinking = false;
+        this.shouldAutoScroll = true;
+        this.render();
+      }
     }
   }
 
@@ -352,6 +400,20 @@ export class VaultAiMemoryView extends ItemView {
     const autoFilePrompt = `\n\nIf the user asks you to create a new file or save your response to a file, output a markdown code block with the language 'file-create'. The first line must be exactly 'Filename: <name>.md', and the rest is the content. Example:\n\`\`\`file-create\nFilename: example.md\nContent goes here...\n\`\`\``;
     return this.plugin.client.chat(this.plugin.settings.systemPrompt + autoFilePrompt,
       `CONVERSATION:\n${history}\n\nQUESTION:\n${question}\n\nSELECTED TEXT:\n${this.selectedText.slice(0, 12000) || "None"}\n\n${attached.filter(Boolean).join("\n\n")}\n\nRETRIEVED LOCAL MEMORY:\n${memory || "None"}`);
+  }
+
+  private async askStream(question: string, onChunk: (chunk: string) => void): Promise<string> {
+    const attached = await Promise.all(this.attachedPaths.map(async (path) => {
+      const file = this.plugin.app.vault.getAbstractFileByPath(path);
+      return file instanceof TFile ? `ATTACHED FILE: ${file.path}\n${(await this.plugin.app.vault.read(file)).slice(0, 12000)}` : "";
+    }));
+    const retrieved = await this.plugin.store.search(question, this.plugin.settings.resultCount);
+    const memory = retrieved.map((item) => `MEMORY [[${item.filePath}]]${item.heading ? ` — ${item.heading}` : ""}\n${item.text}`).join("\n\n");
+    const history = this.plugin.store.getChatMessages().slice(-12).map((message) => `${message.role.toUpperCase()}: ${message.content}`).join("\n");
+    const autoFilePrompt = `\n\nIf the user asks you to create a new file or save your response to a file, output a markdown code block with the language 'file-create'. The first line must be exactly 'Filename: <name>.md', and the rest is the content. Example:\n\`\`\`file-create\nFilename: example.md\nContent goes here...\n\`\`\``;
+    return this.plugin.client.chatStream(this.plugin.settings.systemPrompt + autoFilePrompt,
+      `CONVERSATION:\n${history}\n\nQUESTION:\n${question}\n\nSELECTED TEXT:\n${this.selectedText.slice(0, 12000) || "None"}\n\n${attached.filter(Boolean).join("\n\n")}\n\nRETRIEVED LOCAL MEMORY:\n${memory || "None"}`,
+      onChunk);
   }
 }
 

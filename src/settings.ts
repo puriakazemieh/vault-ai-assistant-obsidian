@@ -58,6 +58,11 @@ export class VaultAiMemorySettingsTab extends PluginSettingTab {
             name: t("settings.chatModel.name", lang),
             desc: t("settings.chatModel.desc", lang),
             control: { type: "dropdown", key: "chatModel", options: this.modelOptions() }
+          },
+          {
+            name: lang === "fa" ? "پاسخ زنده (استریم)" : "Stream Responses",
+            desc: lang === "fa" ? "نمایش قطعه‌به‌قطعه‌ی جواب‌ها در هنگام تولید" : "Stream AI responses word by word",
+            control: { type: "toggle", key: "enableStreaming" }
           }
         ]
       },

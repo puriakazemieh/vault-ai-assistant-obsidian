@@ -67,6 +67,71 @@ export class VaultAiClient {
     if (!content) throw new Error(t("api.error.invalidResponse", this.getSettings().language));
     return content;
   }
+
+  async chatStream(system: string, user: string, onChunk: (chunk: string) => void): Promise<string> {
+    const settings = this.getSettings();
+    if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
+    
+    const response = await fetch(this.endpoint("/chat/completions"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${settings.apiKey.trim()}`
+      },
+      body: JSON.stringify({
+        model: settings.chatModel,
+        temperature: 0.2,
+        stream: true,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`API request (${response.status}): ${text || "request failed"}`);
+    }
+
+    if (!response.body) {
+        throw new Error("No response body returned from stream.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let fullContent = "";
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data: ")) continue;
+        const dataStr = trimmed.slice(6);
+        if (dataStr === "[DONE]") continue;
+        
+        try {
+          const data = JSON.parse(dataStr);
+          if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
+            const chunk = data.choices[0].delta.content;
+            fullContent += chunk;
+            onChunk(chunk);
+          }
+        } catch (e) {
+            // Ignore incomplete chunks
+        }
+      }
+    }
+    
+    return fullContent;
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

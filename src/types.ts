@@ -11,6 +11,7 @@ export interface VaultAiMemorySettings {
   autoIndex: boolean;
   excludedFolders: string;
   systemPrompt: string;
+  enableStreaming: boolean;
 }
 
 export const DEFAULT_SETTINGS: VaultAiMemorySettings = {
@@ -23,7 +24,8 @@ export const DEFAULT_SETTINGS: VaultAiMemorySettings = {
   resultCount: 8,
   autoIndex: true,
   excludedFolders: "Templates,Archive",
-  systemPrompt: "You are AI Vault Memory, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient."
+  systemPrompt: "You are AI Vault Memory, a precise Obsidian knowledge assistant. Reply in the user's language. Use only provided context when making claims about the vault. Cite vault material as [[path]]. State clearly when context is insufficient.",
+  enableStreaming: true
 };
 
 export interface MemoryChunk {
