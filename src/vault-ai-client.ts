@@ -109,6 +109,16 @@ export class VaultAiClient {
             reject(new Error(`Failed to parse response: ${message(error)}`));
           }
         });
+
+        res.on("error", (err) => {
+          clearTimeout(idleTimeout);
+          reject(new Error(`Response error: ${err.message}`));
+        });
+
+        res.on("aborted", () => {
+          clearTimeout(idleTimeout);
+          reject(new Error("Response aborted by server"));
+        });
       });
 
       req.on("error", (err) => {
@@ -215,6 +225,16 @@ export class VaultAiClient {
         res.on("end", () => {
           clearTimeout(idleTimeout);
           resolve(fullContent);
+        });
+
+        res.on("error", (err) => {
+          clearTimeout(idleTimeout);
+          reject(new Error(`Response error: ${err.message}`));
+        });
+
+        res.on("aborted", () => {
+          clearTimeout(idleTimeout);
+          reject(new Error("Response aborted by server"));
         });
       });
 
