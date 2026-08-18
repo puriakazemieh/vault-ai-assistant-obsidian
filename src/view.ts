@@ -151,6 +151,17 @@ export class VaultAiMemoryView extends ItemView {
       }
     });
 
+    history.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      if (target.matches("a.internal-link")) {
+        event.preventDefault();
+        const linktext = target.getAttribute("data-href");
+        if (linktext) {
+          this.plugin.app.workspace.openLinkText(linktext, "", false);
+        }
+      }
+    });
+
     const observer = new MutationObserver(() => {
       if (this.shouldAutoScroll) {
         history.scrollTo({ top: history.scrollHeight, behavior: "auto" });
