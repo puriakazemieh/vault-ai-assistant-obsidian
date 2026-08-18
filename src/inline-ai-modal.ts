@@ -71,6 +71,11 @@ export class InlineAiModal extends Modal {
         this.submitButton.innerText = this.plugin.settings.language === "fa" ? "در حال پردازش..." : "Processing...";
     }
     
+    let errorEl = this.contentEl.querySelector(".vault-ai-error-text") as HTMLElement;
+    if (errorEl) {
+        errorEl.innerText = "";
+    }
+    
     const systemPrompt = `${this.plugin.settings.systemPrompt}\n\nCRITICAL RULE: You are an AI editor assistant. Apply the user's INSTRUCTION to the SELECTED TEXT. You must output ONLY the modified text. Do NOT add any explanations, conversational pleasantries, or markdown formatting blocks (unless the text itself is code).`;
     const userPrompt = `INSTRUCTION:\n${this.instruction}\n\nSELECTED TEXT:\n${this.selection}`;
     
