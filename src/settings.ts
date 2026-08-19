@@ -42,7 +42,7 @@ export class VaultAiMemorySettingsTab extends PluginSettingTab {
             render: (setting) => {
               setting.addText((text) => {
                 text.inputEl.type = "password";
-                text.setPlaceholder("sk-…")
+                text.setPlaceholder("Sk-…")
                   .setValue(this.plugin.settings.apiKey)
                   .onChange((value) => { void this.updateSetting("apiKey", value.trim()); });
               });
@@ -134,10 +134,12 @@ export class VaultAiMemorySettingsTab extends PluginSettingTab {
 
   private modelOptions(): Record<string, string> {
     if (this.models.length === 0) return { [this.plugin.settings.chatModel]: this.plugin.settings.chatModel };
-    return Object.fromEntries(this.models.map((model) => [
-      model.id,
-      model.name ? `${model.id} — ${model.name}` : model.id
-    ]));
+    return Object.fromEntries(
+      this.models.map((model): [string, string] => [
+        model.id,
+        model.name ? `${model.id} — ${model.name}` : model.id
+      ])
+    );
   }
 
   private async updateSetting<Key extends SettingKey>(key: Key, value: unknown): Promise<void> {

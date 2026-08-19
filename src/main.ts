@@ -19,7 +19,7 @@ export default class VaultAiMemoryPlugin extends Plugin {
     this.registerView(VIEW_TYPE_VAULT_AI_MEMORY, (leaf) => new VaultAiMemoryView(leaf, this));
     
     // Commands and Ribbons using translation
-    this.addRibbonIcon("brain-circuit", "Open AI Vault Memory", () => { void this.activateMemoryView(); });
+    this.addRibbonIcon("brain-circuit", "Open AI vault memory", () => { void this.activateMemoryView(); });
     this.addCommand({ id: "open-memory", name: "Open memory search", callback: () => { void this.activateMemoryView(); } });
     this.addCommand({ id: "rebuild-memory", name: "Rebuild vault memory index", callback: () => { void this.rebuildIndex(); } });
     this.addCommand({ id: "index-current-file", name: "Index current file", callback: () => { void this.indexActiveFile(); } });

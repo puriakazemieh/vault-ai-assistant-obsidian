@@ -20,7 +20,7 @@ export class VaultAiMemoryView extends ItemView {
   }
 
   getViewType(): string { return VIEW_TYPE_VAULT_AI_MEMORY; }
-  getDisplayText(): string { return "AI Vault Memory"; }
+  getDisplayText(): string { return "AI vault memory"; }
   getIcon(): string { return "brain-circuit"; }
   async onOpen(): Promise<void> { this.render(); }
 
@@ -400,12 +400,11 @@ export class VaultAiMemoryView extends ItemView {
   private async executeAutoActions(content: string): Promise<string> {
     const regex = /```file-create\nFilename:\s*(.+?)\n([\s\S]*?)```/g;
     let modifiedContent = content;
-    const matches = Array.from(content.matchAll(regex));
-    
-    for (const match of matches) {
-      const fullMatch = String(match[0]);
-      const filename = String(match[1]).trim();
-      const fileContent = String(match[2]).trim();
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(content)) !== null) {
+      const fullMatch = match[0];
+      const filename = match[1].trim();
+      const fileContent = match[2].trim();
       
       try {
         let finalPath = filename;
