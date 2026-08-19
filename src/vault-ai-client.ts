@@ -1,4 +1,5 @@
 import { requestUrl } from "obsidian";
+import * as http from "http";
 import * as https from "https";
 import { URL } from "url";
 import type { VaultAiMemorySettings, VaultAiModel } from "./types";
@@ -82,7 +83,8 @@ export class VaultAiClient {
       };
       resetIdleTimeout();
 
-      const req = https.request(url, options, (res) => {
+      const requestFn = url.protocol === "http:" ? http.request : https.request;
+      const req = requestFn(url, options, (res) => {
         let body = "";
         res.on("data", (chunk) => {
             resetIdleTimeout();
@@ -175,7 +177,8 @@ export class VaultAiClient {
       };
       resetIdleTimeout();
 
-      const req = https.request(url, options, (res) => {
+      const requestFn = url.protocol === "http:" ? http.request : https.request;
+      const req = requestFn(url, options, (res) => {
         if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
           let errorBody = "";
           res.on("data", (chunk) => { 

@@ -1,7 +1,7 @@
 {
   "id": "vault-ai-chat",
   "name": "AI Vault Memory",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "minAppVersion": "1.13.0",
   "description": "AI-powered local vault memory and context-aware chat with any OpenAI-compatible API.",
   "author": "Puria Kazemieh",

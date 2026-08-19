@@ -11,7 +11,7 @@ export class InlineAiModal extends Modal {
     app: App, 
     private plugin: VaultAiMemoryPlugin, 
     private editor: Editor,
-    private selection: string
+    private selectedText: string
   ) {
     super(app);
   }
@@ -59,49 +59,54 @@ export class InlineAiModal extends Modal {
   }
 
   private async submit(): Promise<void> {
-    if (!this.instruction.trim()) {
-        return;
-    }
-    if (this.submitButton && this.submitButton.disabled) {
-        return;
-    }
-    
-    if (this.submitButton) {
-        this.submitButton.disabled = true;
-        this.submitButton.innerText = this.plugin.settings.language === "fa" ? "در حال پردازش..." : "Processing...";
-    }
-    
-    let errorEl = this.contentEl.querySelector(".vault-ai-error-text") as HTMLElement;
-    if (errorEl) {
-        errorEl.innerText = "";
-    }
-    
-    const systemPrompt = this.plugin.settings.systemPrompt || "";
-    const userPrompt = `CONVERSATION:\n\n\nQUESTION:\n${this.instruction} (Act as an editor. Output ONLY the final modified text without any explanations)\n\nSELECTED TEXT:\n${this.selection.slice(0, 12000) || "None"}\n\n\n\nRETRIEVED LOCAL MEMORY:\nNone`;
-    
-    const cursorStart = this.editor.getCursor("from");
-    let currentPos = cursorStart;
-    let hasStartedReplacing = false;
-    
-    this.abortController = new AbortController();
-    
     try {
-        const answer = await this.plugin.client.chat(systemPrompt, userPrompt, this.abortController.signal);
+        if (!this.instruction.trim()) {
+            return;
+        }
+        if (this.submitButton && this.submitButton.disabled) {
+            return;
+        }
         
-        this.editor.replaceSelection(answer);
-        hasStartedReplacing = true;
+        if (this.submitButton) {
+            this.submitButton.disabled = true;
+            this.submitButton.innerText = this.plugin.settings.language === "fa" ? "در حال پردازش..." : "Processing...";
+        }
+        
+        let errorEl = this.contentEl.querySelector(".vault-ai-error-text") as HTMLElement;
+        if (errorEl) {
+            errorEl.innerText = "";
+        }
+        
+        const systemPrompt = this.plugin.settings.systemPrompt || "";
+        const userPrompt = `CONVERSATION:\n\n\nQUESTION:\n${this.instruction} (Act as an editor. Output ONLY the final modified text without any explanations)\n\nSELECTED TEXT:\n${this.selectedText.slice(0, 12000) || "None"}\n\n\n\nRETRIEVED LOCAL MEMORY:\nNone`;
+        
+        this.abortController = new AbortController();
+        
+        new Notice(this.plugin.settings.language === "fa" ? "در حال ارسال درخواست به سرور..." : "Sending request to server...");
+        
+        if (this.plugin.settings.enableStreaming) {
+            this.editor.replaceSelection("");
+            let currentPos = this.editor.getCursor();
+            
+            await this.plugin.client.chatStream(systemPrompt, userPrompt, (chunk) => {
+                this.editor.replaceRange(chunk, currentPos);
+                const lines = chunk.split('\n');
+                if (lines.length === 1) {
+                    currentPos.ch += chunk.length;
+                } else {
+                    currentPos.line += lines.length - 1;
+                    currentPos.ch = lines[lines.length - 1].length;
+                }
+            }, this.abortController.signal);
+        } else {
+            const answer = await this.plugin.client.chat(systemPrompt, userPrompt, this.abortController.signal);
+            this.editor.replaceSelection(answer);
+        }
         
         this.close();
     } catch (error) {
         if (error instanceof Error && error.message.includes("AbortError")) {
-            if (hasStartedReplacing) {
-                this.editor.replaceRange(this.selection, cursorStart, currentPos);
-            }
             return;
-        }
-        
-        if (hasStartedReplacing) {
-            this.editor.replaceRange(this.selection, cursorStart, currentPos);
         }
         
         let errorEl = this.contentEl.querySelector(".vault-ai-error-text") as HTMLElement;
@@ -111,6 +116,7 @@ export class InlineAiModal extends Modal {
             errorEl.style.marginTop = "12px";
         }
         errorEl.innerText = `خطا: ${error instanceof Error ? error.message : String(error)}`;
+        new Notice("خطا در ارتباط با سرور: " + (error instanceof Error ? error.message : String(error)));
         
         if (this.submitButton) {
             this.submitButton.disabled = false;
