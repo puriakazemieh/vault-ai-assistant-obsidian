@@ -1,7 +1,4 @@
-import { requestUrl } from "obsidian";
-import * as http from "http";
-import * as https from "https";
-import { URL } from "url";
+import { requestUrl, Platform } from "obsidian";
 import type { VaultAiMemorySettings, VaultAiModel } from "./types";
 import { t } from "./i18n";
 
@@ -61,93 +58,60 @@ export class VaultAiClient {
     const settings = this.getSettings();
     if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     
-    return new Promise((resolve, reject) => {
-      const url = new URL(this.endpoint("/chat/completions"));
-      const options = {
-        method: "POST",
-        timeout: 60000,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "User-Agent": "Obsidian-Vault-AI",
-          "Authorization": `Bearer ${settings.apiKey.trim()}`
-        }
+    return new Promise(async (resolve, reject) => {
+      let aborted = false;
+      const onAbort = () => {
+        aborted = true;
+        reject(new Error("AbortError"));
       };
-
-      let idleTimeout: NodeJS.Timeout;
-      const resetIdleTimeout = () => {
-          clearTimeout(idleTimeout);
-          idleTimeout = setTimeout(() => {
-              req.destroy(new Error("Request timed out: server did not respond in 60s"));
-          }, 60000);
-      };
-      resetIdleTimeout();
-
-      const requestFn = url.protocol === "http:" ? http.request : https.request;
-      const req = requestFn(url, options, (res) => {
-        let body = "";
-        res.on("data", (chunk) => {
-            resetIdleTimeout();
-            body += chunk;
-        });
-        res.on("end", () => {
-          clearTimeout(idleTimeout);
-          if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
-            reject(new Error(`API request (${res.statusCode}): ${body || "request failed"}`));
-            return;
-          }
-          try {
-            const data = JSON.parse(body);
-            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-              reject(new Error(t("api.error.invalidResponse", settings.language)));
-              return;
-            }
-            let content = data.choices[0].message.content;
-            if (typeof content === "object" && content !== null) {
-              content = content.text || content.content || JSON.stringify(content);
-            }
-            resolve(typeof content === "string" ? content : String(content || ""));
-          } catch (error) {
-            reject(new Error(`Failed to parse response: ${message(error)}`));
-          }
-        });
-
-        res.on("error", (err) => {
-          clearTimeout(idleTimeout);
-          reject(new Error(`Response error: ${err.message}`));
-        });
-
-        res.on("aborted", () => {
-          clearTimeout(idleTimeout);
-          reject(new Error("Response aborted by server"));
-        });
-      });
-
-      req.on("error", (err) => {
-        clearTimeout(idleTimeout);
-        reject(new Error(`Request failed: ${err.message}`));
-      });
-      
-      req.on("timeout", () => {
-        req.destroy(new Error("Request timed out"));
-      });
       
       if (signal) {
-        signal.addEventListener("abort", () => {
-          clearTimeout(idleTimeout);
-          req.destroy(new Error("AbortError"));
-        });
+        if (signal.aborted) return reject(new Error("AbortError"));
+        signal.addEventListener("abort", onAbort);
       }
 
-      req.write(JSON.stringify({
-        model: settings.chatModel,
-        temperature: 0.2,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user }
-        ]
-      }));
-      req.end();
+      try {
+        const response = await requestUrl({
+          url: this.endpoint("/chat/completions"),
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "Obsidian-Vault-AI",
+            "Authorization": `Bearer ${settings.apiKey.trim()}`
+          },
+          body: JSON.stringify({
+            model: settings.chatModel,
+            temperature: 0.2,
+            messages: [
+              { role: "system", content: system },
+              { role: "user", content: user }
+            ]
+          }),
+          throw: false
+        });
+
+        if (aborted) return;
+        
+        if (response.status < 200 || response.status >= 300) {
+          const detail = responseErrorDetail(response.json as unknown, response.text);
+          reject(new Error(`API request (${response.status}): ${detail || "request failed"}`));
+          return;
+        }
+
+        const data = response.json as unknown;
+        const content = chatContent(data);
+        if (content === null) {
+          reject(new Error(t("api.error.invalidResponse", settings.language)));
+          return;
+        }
+        
+        resolve(content);
+      } catch (error) {
+        if (!aborted) reject(new Error(`Request failed: ${message(error)}`));
+      } finally {
+        if (signal) signal.removeEventListener("abort", onAbort);
+      }
     });
   }
 
@@ -156,6 +120,18 @@ export class VaultAiClient {
     if (!settings.apiKey.trim()) throw new Error(t("api.error.apiKey", settings.language));
     
     return new Promise((resolve, reject) => {
+      if (!Platform.isDesktop) {
+        reject(new Error("Streaming is only supported on desktop. Please disable 'Stream Responses' in settings."));
+        return;
+      }
+      
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const http = require("http");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const https = require("https");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { URL } = require("url");
+
       const url = new URL(this.endpoint("/chat/completions"));
       const options = {
         method: "POST",
@@ -168,25 +144,33 @@ export class VaultAiClient {
         }
       };
 
-      let idleTimeout: NodeJS.Timeout;
+      let idleTimeout: number;
       const resetIdleTimeout = () => {
-          clearTimeout(idleTimeout);
-          idleTimeout = setTimeout(() => {
+          window.clearTimeout(idleTimeout);
+          idleTimeout = window.setTimeout(() => {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
               req.destroy(new Error("Stream idle timeout: no data received for 30s"));
           }, 30000);
       };
       resetIdleTimeout();
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const requestFn = url.protocol === "http:" ? http.request : https.request;
-      const req = requestFn(url, options, (res) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const req = requestFn(url, options, (res: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
           let errorBody = "";
-          res.on("data", (chunk) => { 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+          res.on("data", (chunk: any) => { 
               resetIdleTimeout();
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
               errorBody += chunk.toString(); 
           });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           res.on("end", () => {
-             clearTimeout(idleTimeout);
+             window.clearTimeout(idleTimeout);
+             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
              reject(new Error(`API request (${res.statusCode}): ${errorBody || "request failed"}`));
           });
           return;
@@ -195,8 +179,10 @@ export class VaultAiClient {
         let fullContent = "";
         let buffer = "";
 
-        res.on("data", (chunk: Buffer) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        res.on("data", (chunk: any) => {
           resetIdleTimeout();
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           buffer += chunk.toString("utf-8");
           const lines = buffer.split("\n");
           buffer = lines.pop() || "";
@@ -208,14 +194,9 @@ export class VaultAiClient {
             if (dataStr === "[DONE]") continue;
             
             try {
-              const data = JSON.parse(dataStr);
-              if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
-                let textChunk = data.choices[0].delta.content;
-                if (typeof textChunk === "object" && textChunk !== null) {
-                   textChunk = textChunk.text || textChunk.content || JSON.stringify(textChunk);
-                }
-                textChunk = typeof textChunk === "string" ? textChunk : String(textChunk || "");
-                
+              const data = JSON.parse(dataStr) as unknown;
+              const textChunk = chatContent(data);
+              if (textChunk) {
                 fullContent += textChunk;
                 onChunk(textChunk);
               }
@@ -225,38 +206,46 @@ export class VaultAiClient {
           }
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         res.on("end", () => {
-          clearTimeout(idleTimeout);
+          window.clearTimeout(idleTimeout);
           resolve(fullContent);
         });
 
-        res.on("error", (err) => {
-          clearTimeout(idleTimeout);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        res.on("error", (err: Error) => {
+          window.clearTimeout(idleTimeout);
           reject(new Error(`Response error: ${err.message}`));
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         res.on("aborted", () => {
-          clearTimeout(idleTimeout);
+          window.clearTimeout(idleTimeout);
           reject(new Error("Response aborted by server"));
         });
       });
 
-      req.on("error", (err) => {
-        clearTimeout(idleTimeout);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      req.on("error", (err: Error) => {
+        window.clearTimeout(idleTimeout);
         reject(new Error(`Request failed: ${err.message}`));
       });
       
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       req.on("timeout", () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         req.destroy(new Error("Request timed out"));
       });
       
       if (signal) {
         signal.addEventListener("abort", () => {
-          clearTimeout(idleTimeout);
+          window.clearTimeout(idleTimeout);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           req.destroy(new Error("AbortError"));
         });
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       req.write(JSON.stringify({
         model: settings.chatModel,
         temperature: 0.2,
@@ -266,6 +255,7 @@ export class VaultAiClient {
           { role: "user", content: user }
         ]
       }));
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       req.end();
     });
   }

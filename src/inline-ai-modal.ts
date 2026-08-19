@@ -28,17 +28,17 @@ export class InlineAiModal extends Modal {
             .onChange((value) => {
                this.instruction = value;
             });
-        text.inputEl.style.width = "100%";
+        text.inputEl.setCssStyles({ width: "100%" });
         text.inputEl.addEventListener("keydown", (e) => {
            if (e.key === "Enter") {
                e.preventDefault();
                void this.submit();
            }
         });
-        setTimeout(() => text.inputEl.focus(), 50);
+        window.setTimeout(() => text.inputEl.focus(), 50);
       });
       
-    inputSetting.settingEl.style.borderTop = "none";
+    inputSetting.settingEl.setCssStyles({ borderTop: "none" });
       
     new Setting(contentEl)
       .addButton((btn) => {
@@ -96,8 +96,7 @@ export class InlineAiModal extends Modal {
         let errorEl = this.contentEl.querySelector(".vault-ai-error-text") as HTMLElement;
         if (!errorEl) {
             errorEl = this.contentEl.createEl("p", { cls: "vault-ai-error-text" });
-            errorEl.style.color = "var(--text-error)";
-            errorEl.style.marginTop = "12px";
+            errorEl.setCssStyles({ color: "var(--text-error)", marginTop: "12px" });
         }
         errorEl.innerText = `خطا: ${error instanceof Error ? error.message : String(error)}`;
         new Notice("خطا در ارتباط با سرور: " + (error instanceof Error ? error.message : String(error)));

@@ -1,4 +1,4 @@
-import { App, FuzzySuggestModal, ItemView, MarkdownRenderer, Menu, Notice, setIcon, TFile, WorkspaceLeaf } from "obsidian";
+import { ItemView, Menu, Notice, setIcon, MarkdownRenderer, WorkspaceLeaf, TFile } from "obsidian";
 import { ConfirmModal } from "./confirm-modal";
 import { MarkdownFilePicker } from "./file-picker";
 import { t } from "./i18n";
@@ -173,7 +173,7 @@ export class VaultAiMemoryView extends ItemView {
         event.preventDefault();
         const linktext = target.getAttribute("data-href");
         if (linktext) {
-          this.plugin.app.workspace.openLinkText(linktext, "", false);
+          void this.plugin.app.workspace.openLinkText(linktext, "", false);
         }
       }
     });
@@ -185,7 +185,7 @@ export class VaultAiMemoryView extends ItemView {
     });
     observer.observe(history, { childList: true, subtree: true, characterData: true });
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (this.shouldAutoScroll) {
         history.scrollTo({ top: history.scrollHeight, behavior: "auto" });
       } else {
@@ -400,12 +400,12 @@ export class VaultAiMemoryView extends ItemView {
   private async executeAutoActions(content: string): Promise<string> {
     const regex = /```file-create\nFilename:\s*(.+?)\n([\s\S]*?)```/g;
     let modifiedContent = content;
-    const matches = [...content.matchAll(regex)];
+    const matches = Array.from(content.matchAll(regex));
     
     for (const match of matches) {
-      const fullMatch = match[0];
-      const filename = match[1].trim();
-      const fileContent = match[2].trim();
+      const fullMatch = String(match[0]);
+      const filename = String(match[1]).trim();
+      const fileContent = String(match[2]).trim();
       
       try {
         let finalPath = filename;
