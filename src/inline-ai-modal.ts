@@ -84,24 +84,8 @@ export class InlineAiModal extends Modal {
         
         new Notice(this.plugin.settings.language === "fa" ? "در حال ارسال درخواست به سرور..." : "Sending request to server...");
         
-        if (this.plugin.settings.enableStreaming) {
-            this.editor.replaceSelection("");
-            let currentPos = this.editor.getCursor();
-            
-            await this.plugin.client.chatStream(systemPrompt, userPrompt, (chunk) => {
-                this.editor.replaceRange(chunk, currentPos);
-                const lines = chunk.split('\n');
-                if (lines.length === 1) {
-                    currentPos.ch += chunk.length;
-                } else {
-                    currentPos.line += lines.length - 1;
-                    currentPos.ch = lines[lines.length - 1].length;
-                }
-            }, this.abortController.signal);
-        } else {
-            const answer = await this.plugin.client.chat(systemPrompt, userPrompt, this.abortController.signal);
-            this.editor.replaceSelection(answer);
-        }
+        const answer = await this.plugin.client.chat(systemPrompt, userPrompt, this.abortController.signal);
+        this.editor.replaceSelection(answer);
         
         this.close();
     } catch (error) {
