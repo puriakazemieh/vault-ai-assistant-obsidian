@@ -70,6 +70,7 @@ export const translations = {
     "main.command.analyze": "Analyze current file",
     "main.command.analyze.error": "No active file.",
     "main.command.inlinePrompt": "Apply AI on selection",
+    "main.command.generateText": "Generate AI text here",
     
     // inline modal
     "inline.modal.title": "Prompt for AI",
@@ -159,6 +160,7 @@ export const translations = {
     "main.command.analyze": "تحلیل این یادداشت (Analyze)",
     "main.command.analyze.error": "فایل فعالی وجود ندارد.",
     "main.command.inlinePrompt": "اعمال هوش مصنوعی روی متن انتخاب‌شده",
+    "main.command.generateText": "تولید متن با هوش مصنوعی در اینجا",
 
     // inline modal
     "inline.modal.title": "دستور برای هوش مصنوعی",

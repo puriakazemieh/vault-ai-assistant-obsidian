@@ -66,7 +66,13 @@ export default class VaultAiMemoryPlugin extends Plugin {
     
     this.registerEvent(this.app.workspace.on("editor-menu", (menu, editor) => {
       const selection = editor.getSelection();
-      if (!selection.trim()) return;
+      
+      if (!selection.trim()) {
+        menu.addItem((item) => item.setTitle(t("main.command.generateText", this.settings.language)).setIcon("wand-2").onClick(() => {
+          new InlineAiModal(this.app, this, editor, "").open();
+        }));
+        return;
+      }
       
       menu.addItem((item) => item.setTitle(t("main.command.inlinePrompt", this.settings.language)).setIcon("wand-2").onClick(() => {
         new InlineAiModal(this.app, this, editor, selection).open();
