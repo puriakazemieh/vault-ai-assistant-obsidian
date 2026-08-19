@@ -125,11 +125,9 @@ export class VaultAiClient {
         return;
       }
       
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment -- Node.js streaming APIs are dynamically imported and inherently untyped; guarded by Platform.isDesktop check above */
       const http = require("http");
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const https = require("https");
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { URL } = require("url");
 
       const url = new URL(this.endpoint("/chat/completions"));
@@ -148,29 +146,21 @@ export class VaultAiClient {
       const resetIdleTimeout = () => {
           window.clearTimeout(idleTimeout);
           idleTimeout = window.setTimeout(() => {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
               req.destroy(new Error("Stream idle timeout: no data received for 30s"));
           }, 30000);
       };
       resetIdleTimeout();
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const requestFn = url.protocol === "http:" ? http.request : https.request;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const req = requestFn(url, options, (res: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
           let errorBody = "";
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           res.on("data", (chunk: any) => { 
               resetIdleTimeout();
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
               errorBody += chunk.toString(); 
           });
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           res.on("end", () => {
              window.clearTimeout(idleTimeout);
-             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
              reject(new Error(`API request (${res.statusCode}): ${errorBody || "request failed"}`));
           });
           return;
@@ -179,10 +169,8 @@ export class VaultAiClient {
         let fullContent = "";
         let buffer = "";
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         res.on("data", (chunk: any) => {
           resetIdleTimeout();
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           buffer += chunk.toString("utf-8");
           const lines = buffer.split("\n");
           buffer = lines.pop() || "";
@@ -200,52 +188,44 @@ export class VaultAiClient {
                 fullContent += textChunk;
                 onChunk(textChunk);
               }
-            } catch (e) {
-                // Ignore incomplete chunks
+            } catch (_e) {
+                // Ignore incomplete SSE chunks during streaming
             }
           }
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         res.on("end", () => {
           window.clearTimeout(idleTimeout);
           resolve(fullContent);
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         res.on("error", (err: Error) => {
           window.clearTimeout(idleTimeout);
           reject(new Error(`Response error: ${err.message}`));
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         res.on("aborted", () => {
           window.clearTimeout(idleTimeout);
           reject(new Error("Response aborted by server"));
         });
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       req.on("error", (err: Error) => {
         window.clearTimeout(idleTimeout);
         reject(new Error(`Request failed: ${err.message}`));
       });
       
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       req.on("timeout", () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         req.destroy(new Error("Request timed out"));
       });
       
       if (signal) {
         signal.addEventListener("abort", () => {
           window.clearTimeout(idleTimeout);
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           req.destroy(new Error("AbortError"));
         });
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       req.write(JSON.stringify({
         model: settings.chatModel,
         temperature: 0.2,
@@ -255,8 +235,8 @@ export class VaultAiClient {
           { role: "user", content: user }
         ]
       }));
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       req.end();
+      /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
     });
   }
 }
